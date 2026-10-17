@@ -15,6 +15,64 @@
 #include <hip/hip_runtime.h>
 #endif
 
+#if defined(__HIP_PLATFORM_METAL__) && !defined(__METAL_VERSION__)
+#include "hoomd/mtl/MetalRuntime.h"
+#endif
+
+#ifdef __METAL_VERSION__
+
+namespace hoomd
+    {
+//! Device view of ManagedArray in the Metal Shading Language
+/*! GPU virtual addresses differ from CPU addresses on the Metal platform. The host stores the GPU
+    address of the data in gpu_data and device code reads through it. The layout matches the host
+    class. Shared memory staging is not used: the data stays in device memory.
+*/
+template<class T> class ManagedArray
+    {
+    public:
+    inline device T& operator[](unsigned int i) const
+        {
+        return gpu_data[i];
+        }
+
+    inline device T* get() const
+        {
+        return gpu_data;
+        }
+
+    inline unsigned int size() const
+        {
+        return N;
+        }
+
+    void set_memory_hint() const { }
+
+    inline threadgroup void* allocate_shared(threadgroup char* thread& s_ptr,
+                                             thread unsigned int& available_bytes) const
+        {
+        return nullptr;
+        }
+
+    inline bool load_shared(threadgroup char* thread& s_ptr, thread unsigned int& available_bytes)
+        {
+        return false;
+        }
+
+    private:
+    device T* data;
+    device T* ptr;
+    unsigned int N;
+    unsigned int managed;
+    size_t align;
+    device void* allocation_ptr;
+    size_t allocation_bytes;
+    device T* gpu_data;
+    };
+    } // end namespace hoomd
+
+#else // __METAL_VERSION__
+
 #ifdef __HIPCC__
 #define DEVICE __device__
 #define HOSTDEVICE __host__ __device__
@@ -294,6 +352,9 @@ template<class T> class ManagedArray
                                                                        allocation_bytes,
                                                                        allocation_ptr);
         data = ptr;
+#ifdef __HIP_PLATFORM_METAL__
+        gpu_data = (managed && ptr) ? hoomd::mtl::device_address(ptr) : 0;
+#endif
         }
 
     void deallocate()
@@ -306,6 +367,9 @@ template<class T> class ManagedArray
                                                                      allocation_ptr);
             }
         ptr = nullptr;
+#ifdef __HIP_PLATFORM_METAL__
+        gpu_data = 0;
+#endif
         }
 #endif
 
@@ -317,9 +381,14 @@ template<class T> class ManagedArray
     size_t align;            //!< Alignment size
     void* allocation_ptr;    //!< Pointer to un-aligned start of allocation
     size_t allocation_bytes; //!< Total size of allocation, including aligned part
+#ifdef __HIP_PLATFORM_METAL__
+    uint64_t gpu_data = 0; //!< GPU virtual address of data (Metal platform)
+#endif
     };
 
     } // end namespace hoomd
 
 #undef DEVICE
 #undef HOSTDEVICE
+
+#endif // __METAL_VERSION__

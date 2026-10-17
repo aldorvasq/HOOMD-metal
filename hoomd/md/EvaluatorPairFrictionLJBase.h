@@ -32,13 +32,20 @@ namespace hoomd
     {
 namespace md
     {
+/*! \tparam Derived Friction law: a class with a static eval_factors() method (see
+    EvaluatorPairFrictionLJVariants.h). The friction law is a policy rather than a derived class
+    so that the evaluator is valid in the Metal Shading Language, which has no inheritance.
+*/
 template<class Derived> class EvaluatorPairFrictionLJBase
     {
     public:
-    // Add the eval_factors() method declaration
-    HOSTDEVICE void eval_factors(Scalar& factor_f, Scalar& factor_r, Scalar w, Scalar du)
+    //! Evaluate the friction and random force factors with the friction law
+    HOSTDEVICE void eval_factors(Scalar HOOMD_THREAD& factor_f,
+                                 Scalar HOOMD_THREAD& factor_r,
+                                 Scalar w,
+                                 Scalar du)
         {
-        static_cast<Derived*>(this)->eval_factors(factor_f, factor_r, w, du);
+        Derived::eval_factors(factor_f, factor_r, w, du, gamma, kappa, pair_temp, nu_ij);
         }
 
     struct param_type
@@ -64,9 +71,9 @@ template<class Derived> class EvaluatorPairFrictionLJBase
             \param available_bytes Size of remaining shared memory
             allocation
         */
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
         HOSTDEVICE param_type() : sigma_6(0), epsilon_x_4(0), gamma(0), kappa(0), pair_temp(0) { }
 
@@ -122,14 +129,14 @@ template<class Derived> class EvaluatorPairFrictionLJBase
         \param pair_temp Pair temperature of the frictional contact
         \param _params Per type pair parameters of this potential
     */
-    HOSTDEVICE EvaluatorPairFrictionLJBase(Scalar3& _dr,
-                                           Scalar3& _angvel_i,
-                                           Scalar3& _angvel_j,
-                                           Scalar3& _dv,
+    HOSTDEVICE EvaluatorPairFrictionLJBase(Scalar3 HOOMD_THREAD& _dr,
+                                           Scalar3 HOOMD_THREAD& _angvel_i,
+                                           Scalar3 HOOMD_THREAD& _angvel_j,
+                                           Scalar3 HOOMD_THREAD& _dv,
                                            Scalar _dia_i,
                                            Scalar _dia_j,
                                            Scalar _rcutsq,
-                                           const param_type& _params)
+                                           const param_type HOOMD_CREF _params)
         : dr(_dr), rcutsq(_rcutsq), angvel_i(_angvel_i), angvel_j(_angvel_j), dv(_dv),
           dia_i(_dia_i), dia_j(_dia_j),
           lj1(_params.epsilon_x_4 * _params.sigma_6 * _params.sigma_6),
@@ -208,7 +215,7 @@ template<class Derived> class EvaluatorPairFrictionLJBase
         \return True if they are evaluated or false if they are not because
             we are beyond the cutoff.
     */
-    HOSTDEVICE bool evaluate(Scalar3& force, Scalar& pair_eng, Scalar3& torque_i, Scalar3& torque_j)
+    HOSTDEVICE bool evaluate(Scalar3 HOOMD_THREAD& force, Scalar HOOMD_THREAD& pair_eng, Scalar3 HOOMD_THREAD& torque_i, Scalar3 HOOMD_THREAD& torque_j)
         {
         vec3<Scalar> rvec(dr);
         vec3<Scalar> w_i(angvel_i);
@@ -334,13 +341,13 @@ template<class Derived> class EvaluatorPairFrictionLJBase
         return 0;
         }
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     //! Get the name of the potential
     /*! \returns The potential name.
      */
     static std::string getName()
         {
-        return "FrictionLJBase";
+        return Derived::getName();
         }
 #endif
 

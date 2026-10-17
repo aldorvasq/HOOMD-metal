@@ -14,6 +14,15 @@
 // 4 GB is considered a large allocation for a single GPU buffer, and user should be warned
 #define LARGEALLOCBYTES 0xffffffff
 
+// Apple GPUs share memory with the CPU. On the Metal platform, every GPUArray uses mapped memory:
+// the host and device pointers refer to the same allocation, and moving data between the host and
+// the device only requires synchronization.
+#if defined(ENABLE_HIP) && defined(__HIP_PLATFORM_METAL__)
+#define HOOMD_GPUARRAY_FORCE_MAPPED true
+#else
+#define HOOMD_GPUARRAY_FORCE_MAPPED false
+#endif
+
 // for vector types
 #ifdef ENABLE_HIP
 #include <hip/hip_runtime.h>
@@ -29,6 +38,7 @@
 
 #include <cxxabi.h>
 #include <sstream>
+#include <unistd.h>
 
 namespace hoomd
     {
@@ -75,6 +85,19 @@ template<class T> class GPUArray;
 
 namespace detail
     {
+//! Alignment of host allocations
+/*! At minimum, alignment needs to be 32 bytes for AVX. Mapped memory on the Metal platform is
+    page aligned so that the GPU can access it without copies.
+*/
+inline size_t gpu_array_host_alignment()
+    {
+#if defined(ENABLE_HIP) && defined(__HIP_PLATFORM_METAL__)
+    return static_cast<size_t>(getpagesize());
+#else
+    return 32;
+#endif
+    }
+
 template<class T> class device_deleter
     {
     public:
@@ -567,7 +590,7 @@ GPUArray<T>::GPUArray(std::shared_ptr<const ExecutionConfiguration> exec_conf)
     : m_num_elements(0), m_pitch(0), m_height(0), m_acquired(false),
       m_data_location(data_location::host),
 #ifdef ENABLE_HIP
-      m_mapped(false),
+      m_mapped(HOOMD_GPUARRAY_FORCE_MAPPED),
 #endif
       m_exec_conf(exec_conf)
     {
@@ -582,7 +605,7 @@ GPUArray<T>::GPUArray(size_t num_elements, std::shared_ptr<const ExecutionConfig
     : m_num_elements(num_elements), m_pitch(num_elements), m_height(1), m_acquired(false),
       m_data_location(data_location::host),
 #ifdef ENABLE_HIP
-      m_mapped(false),
+      m_mapped(HOOMD_GPUARRAY_FORCE_MAPPED),
 #endif
       m_exec_conf(exec_conf)
     {
@@ -602,7 +625,7 @@ GPUArray<T>::GPUArray(size_t width,
                       std::shared_ptr<const ExecutionConfiguration> exec_conf)
     : m_height(height), m_acquired(false), m_data_location(data_location::host),
 #ifdef ENABLE_HIP
-      m_mapped(false),
+      m_mapped(HOOMD_GPUARRAY_FORCE_MAPPED),
 #endif
       m_exec_conf(exec_conf)
     {
@@ -627,7 +650,8 @@ GPUArray<T>::GPUArray(size_t num_elements,
                       std::shared_ptr<const ExecutionConfiguration> exec_conf,
                       bool mapped)
     : m_num_elements(num_elements), m_pitch(num_elements), m_height(1), m_acquired(false),
-      m_data_location(data_location::host), m_mapped(mapped), m_exec_conf(exec_conf)
+      m_data_location(data_location::host), m_mapped(mapped || HOOMD_GPUARRAY_FORCE_MAPPED),
+      m_exec_conf(exec_conf)
     {
     // allocate and clear memory
     allocate();
@@ -644,7 +668,8 @@ GPUArray<T>::GPUArray(size_t width,
                       size_t height,
                       std::shared_ptr<const ExecutionConfiguration> exec_conf,
                       bool mapped)
-    : m_height(height), m_acquired(false), m_data_location(data_location::host), m_mapped(mapped),
+    : m_height(height), m_acquired(false), m_data_location(data_location::host),
+      m_mapped(mapped || HOOMD_GPUARRAY_FORCE_MAPPED),
       m_exec_conf(exec_conf)
     {
     // make m_pitch the next multiple of 16 larger or equal to the given width
@@ -805,6 +830,11 @@ template<class T> void GPUArray<T>::allocate()
         }
 
 #ifdef ENABLE_HIP
+#ifdef __HIP_PLATFORM_METAL__
+    // arrays are mapped by default on the Metal platform, but only GPU execution uses mapped memory
+    if (!m_exec_conf || !m_exec_conf->isCUDAEnabled())
+        m_mapped = false;
+#endif
     // we require mapped pinned memory
     if (m_mapped && m_exec_conf && !m_exec_conf->dev_prop.canMapHostMemory)
         {
@@ -825,7 +855,9 @@ template<class T> void GPUArray<T>::allocate()
 
     // allocate host memory
     // at minimum, alignment needs to be 32 bytes for AVX
-    int retval = posix_memalign(&host_ptr, 32, m_num_elements * sizeof(T));
+    int retval = posix_memalign(&host_ptr,
+                                detail::gpu_array_host_alignment(),
+                                m_num_elements * sizeof(T));
     if (retval != 0)
         {
         throw std::bad_alloc();
@@ -907,6 +939,18 @@ template<class T> void GPUArray<T>::zeroFill() const
 
 #ifdef ENABLE_HIP
 
+    if (m_mapped && m_exec_conf && m_exec_conf->isCUDAEnabled())
+        {
+        // The host and device share the memory. When the host may read the array without
+        // synchronizing, clear it after the device's pending work. Otherwise clear it in order on
+        // the device.
+        if (m_data_location == data_location::device)
+            hipMemsetAsync(d_data.get(), 0, sizeof(T) * m_num_elements);
+        else
+            hipMemset(h_data.get(), 0, sizeof(T) * m_num_elements);
+        return;
+        }
+
     if (m_data_location == data_location::host || m_data_location == data_location::hostdevice)
         {
         memset((void*)h_data.get(), 0, sizeof(T) * m_num_elements);
@@ -934,6 +978,12 @@ template<class T> void GPUArray<T>::memclear(size_t first)
 
     assert(h_data);
     assert(first < m_num_elements);
+
+#ifdef ENABLE_HIP
+    // mapped memory may still be in use by the device
+    if (m_mapped && m_exec_conf && m_exec_conf->isCUDAEnabled())
+        hipDeviceSynchronize();
+#endif
 
     // clear memory
     memset((void*)(h_data.get() + first), 0, sizeof(T) * (m_num_elements - first));
@@ -1059,6 +1109,18 @@ T* GPUArray<T>::acquire(const access_location::Enum location,
     // first, break down based on where the data is to be acquired
     if (location == access_location::host)
         {
+#ifdef ENABLE_HIP
+        // Mapped memory is shared with the device: before the host modifies data the device may
+        // still be using, wait for the device's pending work. (When the host reads data the device
+        // holds, memcpyDeviceToHost below waits for the device.)
+        if (m_mapped && !async
+            && ((m_data_location == data_location::hostdevice && mode != access_mode::read)
+                || (m_data_location == data_location::device && mode == access_mode::overwrite)))
+            {
+            hipDeviceSynchronize();
+            }
+#endif
+
         // then break down based on the current location of the data
         if (m_data_location == data_location::host)
             {
@@ -1211,12 +1273,20 @@ template<class T> T* GPUArray<T>::resizeHostArray(size_t num_elements)
     if (isNull())
         return NULL;
 
+#ifdef ENABLE_HIP
+    // mapped memory may still be in use by the device
+    if (m_mapped && m_exec_conf && m_exec_conf->isCUDAEnabled())
+        hipDeviceSynchronize();
+#endif
+
     // allocate resized array
     T* h_tmp = NULL;
 
     // allocate host memory
     // at minimum, alignment needs to be 32 bytes for AVX
-    int retval = posix_memalign((void**)&h_tmp, 32, num_elements * sizeof(T));
+    int retval = posix_memalign((void**)&h_tmp,
+                                detail::gpu_array_host_alignment(),
+                                num_elements * sizeof(T));
     if (retval != 0)
         {
         throw std::bad_alloc();
@@ -1274,13 +1344,19 @@ template<class T> T* GPUArray<T>::resizeHostArray(size_t num_elements)
 template<class T>
 T* GPUArray<T>::resize2DHostArray(size_t pitch, size_t new_pitch, size_t height, size_t new_height)
     {
+
+#ifdef ENABLE_HIP
+    // mapped memory may still be in use by the device
+    if (m_mapped && m_exec_conf && m_exec_conf->isCUDAEnabled())
+        hipDeviceSynchronize();
+#endif
     // allocate resized array
     T* h_tmp = NULL;
 
     // allocate host memory
     // at minimum, alignment needs to be 32 bytes for AVX
     size_t size = new_pitch * new_height * sizeof(T);
-    int retval = posix_memalign((void**)&h_tmp, 32, size);
+    int retval = posix_memalign((void**)&h_tmp, detail::gpu_array_host_alignment(), size);
     if (retval != 0)
         {
         throw std::bad_alloc();

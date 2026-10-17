@@ -10,7 +10,7 @@
 #include <map>
 
 #if defined(ENABLE_HIP)
-#if __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
 #include <hipfft.h>
 #elif __HIP_PLATFORM_NVCC__
 #include <cufft.h>

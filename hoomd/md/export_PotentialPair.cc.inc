@@ -16,6 +16,10 @@ namespace hoomd
     {
 namespace md
     {
+// Explicitly instantiate the class here: the GPU export declares it extern and some
+// compilers do not emit all of its members through implicit instantiation.
+template class PotentialPair<EVALUATOR_CLASS>;
+
 namespace detail
     {
 

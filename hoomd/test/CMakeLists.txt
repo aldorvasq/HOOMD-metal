@@ -26,6 +26,11 @@ list(APPEND TEST_LIST
      )
 endif (ENABLE_HIP)
 
+if (ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
+    # unit tests of the HIP-on-Metal runtime and primitives
+    list(APPEND TEST_LIST test_metal_runtime)
+endif()
+
 if(ENABLE_MPI)
     MACRO(ADD_TO_MPI_TESTS _KEY _VALUE)
     SET("NProc_${_KEY}" "${_VALUE}")
@@ -38,16 +43,32 @@ endif()
 
 foreach (CUR_TEST ${TEST_LIST} ${MPI_TEST_LIST})
     # add and link the unit test executable
-    if(ENABLE_HIP AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${CUR_TEST}.cu)
+    set(_metal_sources "")
+    if(ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
+        # Metal kernels replace the .cu files
+        set(_cuda_sources "")
+        if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${CUR_TEST}.metal)
+            set(_metal_sources ${CUR_TEST}.metal)
+        endif()
+    elseif(ENABLE_HIP AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${CUR_TEST}.cu)
         set(_cuda_sources ${CUR_TEST}.cu)
         set_source_files_properties(${_cuda_sources} PROPERTIES LANGUAGE ${HOOMD_DEVICE_LANGUAGE})
     else()
         set(_cuda_sources "")
     endif()
 
-    add_executable(${CUR_TEST} EXCLUDE_FROM_ALL ${CUR_TEST}.cc ${_cuda_sources})
+    if (CUR_TEST STREQUAL "test_metal_runtime")
+        set(_test_source ${HOOMD_SOURCE_DIR}/hoomd/mtl/test/test_metal_runtime.cc)
+    else()
+        set(_test_source ${CUR_TEST}.cc)
+    endif()
+
+    add_executable(${CUR_TEST} EXCLUDE_FROM_ALL ${_test_source} ${_cuda_sources})
+    if (_metal_sources)
+        hoomd_add_metal_sources(${CUR_TEST} ${_metal_sources})
+    endif()
     if(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-        set_source_files_properties(${CUR_TEST}.cc PROPERTIES COMPILE_FLAGS "-Wno-self-assign-overloaded")
+        set_source_files_properties(${_test_source} PROPERTIES COMPILE_FLAGS "-Wno-self-assign-overloaded")
     endif()
 
     add_dependencies(test_all ${CUR_TEST})

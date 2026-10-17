@@ -19,59 +19,61 @@
 
 #include <cstdint>
 
+#include "HOOMDMath.h"
+
 namespace hoomd
     {
 struct RNGIdentifier
     {
-    static const uint8_t ComputeFreeVolume = 0;
-    static const uint8_t HPMCMonoShuffle = 1;
-    static const uint8_t HPMCMonoTrialMove = 2;
-    static const uint8_t HPMCMonoShift = 3;
-    static const uint8_t Unused1 = 4;
-    static const uint8_t Unused2 = 5;
-    static const uint8_t HPMCMonoAccept = 6;
-    static const uint8_t UpdaterBoxMC = 7;
-    static const uint8_t UpdaterGCA = 8;
-    static const uint8_t UpdaterGCAPairwise = 9;
-    static const uint8_t UpdaterExternalFieldWall = 10;
-    static const uint8_t UpdaterMuVTGroup = 11;
-    static const uint8_t Unused3 = 12;
-    static const uint8_t Unused4 = 13;
-    static const uint8_t Unused5 = 14;
-    static const uint8_t EvaluatorPairFrictionLJBase = 15;
-    static const uint8_t Unused7 = 16;
-    static const uint8_t Unused8 = 17;
-    static const uint8_t Unused9 = 18;
-    static const uint8_t UpdaterMuVTInsertRemove = 19;
-    static const uint8_t Unused10 = 20;
-    static const uint8_t ActiveForceCompute = 21;
-    static const uint8_t EvaluatorPairDPDThermo = 22;
-    static const uint8_t IntegrationMethodTwoStep = 23;
-    static const uint8_t TwoStepBD = 24;
-    static const uint8_t TwoStepLangevin = 25;
-    static const uint8_t TwoStepLangevinAngular = 26;
-    static const uint8_t TwoStepConstantPressureThermalizeBarostat = 27;
-    static const uint8_t MTTKThermostat = 28;
-    static const uint8_t ATCollisionMethod = 29;
-    static const uint8_t CollisionMethod = 30;
-    static const uint8_t SRDCollisionMethod = 31;
-    static const uint8_t VirtualParticleFiller = 32;
-    static const uint8_t UpdaterQuickCompress = 34;
-    static const uint8_t ParticleGroupThermalize = 35;
-    static const uint8_t Unused11 = 36;
-    static const uint8_t Unused12 = 37;
-    static const uint8_t Unused13 = 38;
-    static const uint8_t HPMCMonoPatch = 39;
-    static const uint8_t UpdaterGCA2 = 40;
-    static const uint8_t HPMCMonoChainMove = 41;
-    static const uint8_t UpdaterShapeUpdate = 42;
-    static const uint8_t UpdaterShapeConstruct = 43;
-    static const uint8_t HPMCShapeMoveUpdateOrder = 44;
-    static const uint8_t BussiThermostat = 45;
-    static const uint8_t ConstantPressure = 46;
-    static const uint8_t MPCDCellList = 47;
-    static const uint8_t MeshDynamicBondUpdateOrder = 48;
-    static const uint8_t MeshDynamicBondUpdater = 49;
+    static HOOMD_CONSTANT const uint8_t ComputeFreeVolume = 0;
+    static HOOMD_CONSTANT const uint8_t HPMCMonoShuffle = 1;
+    static HOOMD_CONSTANT const uint8_t HPMCMonoTrialMove = 2;
+    static HOOMD_CONSTANT const uint8_t HPMCMonoShift = 3;
+    static HOOMD_CONSTANT const uint8_t Unused1 = 4;
+    static HOOMD_CONSTANT const uint8_t Unused2 = 5;
+    static HOOMD_CONSTANT const uint8_t HPMCMonoAccept = 6;
+    static HOOMD_CONSTANT const uint8_t UpdaterBoxMC = 7;
+    static HOOMD_CONSTANT const uint8_t UpdaterGCA = 8;
+    static HOOMD_CONSTANT const uint8_t UpdaterGCAPairwise = 9;
+    static HOOMD_CONSTANT const uint8_t UpdaterExternalFieldWall = 10;
+    static HOOMD_CONSTANT const uint8_t UpdaterMuVTGroup = 11;
+    static HOOMD_CONSTANT const uint8_t Unused3 = 12;
+    static HOOMD_CONSTANT const uint8_t Unused4 = 13;
+    static HOOMD_CONSTANT const uint8_t Unused5 = 14;
+    static HOOMD_CONSTANT const uint8_t EvaluatorPairFrictionLJBase = 15;
+    static HOOMD_CONSTANT const uint8_t Unused7 = 16;
+    static HOOMD_CONSTANT const uint8_t Unused8 = 17;
+    static HOOMD_CONSTANT const uint8_t Unused9 = 18;
+    static HOOMD_CONSTANT const uint8_t UpdaterMuVTInsertRemove = 19;
+    static HOOMD_CONSTANT const uint8_t Unused10 = 20;
+    static HOOMD_CONSTANT const uint8_t ActiveForceCompute = 21;
+    static HOOMD_CONSTANT const uint8_t EvaluatorPairDPDThermo = 22;
+    static HOOMD_CONSTANT const uint8_t IntegrationMethodTwoStep = 23;
+    static HOOMD_CONSTANT const uint8_t TwoStepBD = 24;
+    static HOOMD_CONSTANT const uint8_t TwoStepLangevin = 25;
+    static HOOMD_CONSTANT const uint8_t TwoStepLangevinAngular = 26;
+    static HOOMD_CONSTANT const uint8_t TwoStepConstantPressureThermalizeBarostat = 27;
+    static HOOMD_CONSTANT const uint8_t MTTKThermostat = 28;
+    static HOOMD_CONSTANT const uint8_t ATCollisionMethod = 29;
+    static HOOMD_CONSTANT const uint8_t CollisionMethod = 30;
+    static HOOMD_CONSTANT const uint8_t SRDCollisionMethod = 31;
+    static HOOMD_CONSTANT const uint8_t VirtualParticleFiller = 32;
+    static HOOMD_CONSTANT const uint8_t UpdaterQuickCompress = 34;
+    static HOOMD_CONSTANT const uint8_t ParticleGroupThermalize = 35;
+    static HOOMD_CONSTANT const uint8_t Unused11 = 36;
+    static HOOMD_CONSTANT const uint8_t Unused12 = 37;
+    static HOOMD_CONSTANT const uint8_t Unused13 = 38;
+    static HOOMD_CONSTANT const uint8_t HPMCMonoPatch = 39;
+    static HOOMD_CONSTANT const uint8_t UpdaterGCA2 = 40;
+    static HOOMD_CONSTANT const uint8_t HPMCMonoChainMove = 41;
+    static HOOMD_CONSTANT const uint8_t UpdaterShapeUpdate = 42;
+    static HOOMD_CONSTANT const uint8_t UpdaterShapeConstruct = 43;
+    static HOOMD_CONSTANT const uint8_t HPMCShapeMoveUpdateOrder = 44;
+    static HOOMD_CONSTANT const uint8_t BussiThermostat = 45;
+    static HOOMD_CONSTANT const uint8_t ConstantPressure = 46;
+    static HOOMD_CONSTANT const uint8_t MPCDCellList = 47;
+    static HOOMD_CONSTANT const uint8_t MeshDynamicBondUpdateOrder = 48;
+    static HOOMD_CONSTANT const uint8_t MeshDynamicBondUpdater = 49;
     };
 
     } // namespace hoomd

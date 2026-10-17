@@ -107,13 +107,13 @@ class PatchEnvelope
          \param shape_i The patch location on the i^{th} particle
          \param shape_j The patch location on the j^{th} particle
     */
-    DEVICE PatchEnvelope(const Scalar3& _dr,
-                         const Scalar4& _q_i,
-                         const Scalar4& _q_j,
+    DEVICE PatchEnvelope(const Scalar3 HOOMD_CREF _dr,
+                         const Scalar4 HOOMD_CREF _q_i,
+                         const Scalar4 HOOMD_CREF _q_j,
                          const Scalar _rcutsq,
-                         const param_type& _params,
-                         const shape_type& shape_i,
-                         const shape_type& shape_j)
+                         const param_type HOOMD_CREF _params,
+                         const shape_type HOOMD_CREF shape_i,
+                         const shape_type HOOMD_CREF shape_j)
         : dr(_dr), params(_params), p_i(shape_i.m_norm_patch_local_dir),
           p_j(shape_j.m_norm_patch_local_dir)
         {
@@ -189,10 +189,10 @@ class PatchEnvelope
       energy of interaction. \note There is no need to check if rsq < rcutsq in this method. Cutoff
       tests are performed in PotentialPair from the PairModulator. \return Always true
     */
-    DEVICE bool evaluate(Scalar3& force,
-                         Scalar& envelope,
-                         Scalar3& torque_div_energy_i,
-                         Scalar3& torque_div_energy_j)
+    DEVICE bool evaluate(Scalar3 HOOMD_THREAD& force,
+                         Scalar HOOMD_THREAD& envelope,
+                         Scalar3 HOOMD_THREAD& torque_div_energy_i,
+                         Scalar3 HOOMD_THREAD& torque_div_energy_j)
         {
         // common calculations
 
@@ -256,7 +256,7 @@ class PatchEnvelope
         return true;
         }
 
-#ifndef _HIPCC_
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     static std::string getName()
         {
         return std::string("patchenvelope");
@@ -266,7 +266,7 @@ class PatchEnvelope
     private:
     vec3<Scalar> dr;
 
-    const param_type& params;
+    const param_type HOOMD_CREF params;
     vec3<Scalar> ni_world, nj_world;
     vec3<Scalar> p_i, p_j;
     vec3<Scalar> a1, a2, a3;

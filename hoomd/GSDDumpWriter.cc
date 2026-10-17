@@ -1005,7 +1005,10 @@ void GSDDumpWriter::writeTopology(BondData::Snapshot& bond,
 
         m_exec_conf->msg->notice(10) << "GSD: writing constraints/value" << endl;
             {
-            writeFloatDoubleChunk("constraints/value", constraint.val, N, 1);
+            writeFloatDoubleChunk("constraints/value",
+                                  std::vector<double>(constraint.val.begin(), constraint.val.end()),
+                                  N,
+                                  1);
             }
 
         m_exec_conf->msg->notice(10) << "GSD: writing constraints/group" << endl;

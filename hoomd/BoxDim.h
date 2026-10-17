@@ -164,6 +164,7 @@ struct
         m_xz_rate = m_xy_rate = m_yz_rate = 0;
         }
 
+#ifndef __HIPCC__
     /// Constructs a box from a std::array<Scalar, 6>
     /** @param array Box parameters
      */
@@ -175,6 +176,7 @@ struct
         m_L_rate = make_scalar3(0, 0, 0);
         m_xz_rate = m_xy_rate = m_yz_rate = 0;
         }
+#endif
 
     //! Get the periodic flags
     /*! \return Periodic flags
@@ -206,7 +208,7 @@ struct
     //! Update the box length
     /*! \param L new box length in each direction
      */
-    HOSTDEVICE void setL(const Scalar3& L)
+    HOSTDEVICE void setL(const Scalar3 HOOMD_CREF L)
         {
         m_hi = L / Scalar(2.0);
         m_lo = -m_hi;
@@ -241,7 +243,7 @@ struct
     /*! \param lo Lo coordinate in the box
         \param hi Hi coordinate in the box
     */
-    HOSTDEVICE void setLoHi(const Scalar3& lo, const Scalar3& hi)
+    HOSTDEVICE void setLoHi(const Scalar3 HOOMD_CREF lo, const Scalar3 HOOMD_CREF hi)
         {
         m_hi = hi;
         m_lo = lo;
@@ -288,7 +290,7 @@ struct
     //! Update the box deformation in each dimension
     /*! \param L_rate box deformation rate in each dimension
      */
-    HOSTDEVICE void setLDeformationRate(const Scalar3& L_rate)
+    HOSTDEVICE void setLDeformationRate(const Scalar3 HOOMD_CREF L_rate)
         {
         m_L_rate = L_rate;
         }
@@ -337,8 +339,8 @@ struct
        inside the box + ghost layer). The returned vector \a f and the given vector \a v are related
        by: \a v = \a f * (L+2*ghost_width) + lo - ghost_width
     */
-    HOSTDEVICE Scalar3 makeFraction(const Scalar3& v,
-                                    const Scalar3& ghost_width = make_scalar3(0.0, 0.0, 0.0)) const
+    HOSTDEVICE Scalar3 makeFraction(const Scalar3 HOOMD_CREF v,
+                                    const Scalar3 HOOMD_CREF ghost_width = make_scalar3(0.0, 0.0, 0.0)) const
         {
         Scalar3 delta = v - m_lo;
         delta.x -= (m_xz - m_yz * m_xy) * v.z + m_xy * v.y;
@@ -348,8 +350,8 @@ struct
         }
 
     //! Make fraction using vec3s
-    HOSTDEVICE vec3<Scalar> makeFraction(const vec3<Scalar>& v,
-                                         const Scalar3& ghost_width
+    HOSTDEVICE vec3<Scalar> makeFraction(const vec3<Scalar> HOOMD_CREF v,
+                                         const Scalar3 HOOMD_CREF ghost_width
                                          = make_scalar3(0.0, 0.0, 0.0)) const
         {
         return vec3<Scalar>(makeFraction(vec_to_scalar3(v), ghost_width));
@@ -359,7 +361,7 @@ struct
     /*! \param f Fractional coordinates between 0 and 1 to scale
         \return A vector inside the box corresponding to f
      */
-    HOSTDEVICE Scalar3 makeCoordinates(const Scalar3& f) const
+    HOSTDEVICE Scalar3 makeCoordinates(const Scalar3 HOOMD_CREF f) const
         {
         Scalar3 v = m_lo + f * m_L;
         v.x += m_xy * v.y + m_xz * v.z;
@@ -368,7 +370,7 @@ struct
         }
 
     //! makeCoordinates for vec3
-    HOSTDEVICE vec3<Scalar> makeCoordinates(const vec3<Scalar>& f) const
+    HOSTDEVICE vec3<Scalar> makeCoordinates(const vec3<Scalar> HOOMD_CREF f) const
         {
         return vec3<Scalar>(makeCoordinates(vec_to_scalar3(f)));
         }
@@ -378,7 +380,7 @@ struct
         \return a vector that is the minimum image vector of \a v, obeying the periodic settings
         \note \a v must not extend more than 1 image beyond the box
     */
-    HOSTDEVICE Scalar3 minImage(const Scalar3& v) const
+    HOSTDEVICE Scalar3 minImage(const Scalar3 HOOMD_CREF v) const
         {
         Scalar3 w = v;
         Scalar3 L = getL();
@@ -456,7 +458,7 @@ struct
         }
 
     //! Minimum image using vec3s
-    HOSTDEVICE vec3<Scalar> minImage(const vec3<Scalar>& v) const
+    HOSTDEVICE vec3<Scalar> minImage(const vec3<Scalar> HOOMD_CREF v) const
         {
         return vec3<Scalar>(minImage(vec_to_scalar3(v)));
         }
@@ -470,7 +472,7 @@ struct
               when computing relative positions between particles in a deforming box
               (shear or elongation) where velocities must remain consistent with the deformation.
     */
-    HOSTDEVICE void minImage(Scalar3& dr, Scalar3& dv) const
+    HOSTDEVICE void minImage(Scalar3 HOOMD_THREAD& dr, Scalar3 HOOMD_THREAD& dv) const
         {
         Scalar3 r = dr;
         Scalar3 v = dv;
@@ -569,7 +571,7 @@ struct
         }
 
     //! Minimum image using vec3s
-    HOSTDEVICE void minImage(vec3<Scalar>& dr, vec3<Scalar>& dv) const
+    HOSTDEVICE void minImage(vec3<Scalar> HOOMD_THREAD& dr, vec3<Scalar> HOOMD_THREAD& dv) const
         {
         Scalar3 dr_scalar = vec_to_scalar3(dr);
         Scalar3 dv_scalar = vec_to_scalar3(dv);
@@ -585,7 +587,7 @@ struct
         \post \a img and \a v are updated appropriately
         \note \a v must not extend more than 1 image beyond the box
     */
-    HOSTDEVICE void wrap(Scalar3& w, int3& img, char3 flags = make_char3(0, 0, 0)) const
+    HOSTDEVICE void wrap(Scalar3 HOOMD_THREAD& w, int3 HOOMD_THREAD& img, char3 flags = make_char3(0, 0, 0)) const
         {
         Scalar3 L = getL();
 
@@ -655,7 +657,7 @@ struct
         }
 
     //! Wrap a vec3
-    HOSTDEVICE void wrap(vec3<Scalar>& w, int3& img, char3 flags = make_char3(0, 0, 0)) const
+    HOSTDEVICE void wrap(vec3<Scalar> HOOMD_THREAD& w, int3 HOOMD_THREAD& img, char3 flags = make_char3(0, 0, 0)) const
         {
         Scalar3 w_scalar = vec_to_scalar3(w);
         wrap(w_scalar, img, flags);
@@ -672,7 +674,7 @@ struct
         \note \a v must not extend more than 1 image beyond the box
         \note This is a special version that wraps a Scalar4 (the 4th element is left alone)
     */
-    HOSTDEVICE void wrap(Scalar4& w, int3& img, char3 flags = make_char3(0, 0, 0)) const
+    HOSTDEVICE void wrap(Scalar4 HOOMD_THREAD& w, int3 HOOMD_THREAD& img, char3 flags = make_char3(0, 0, 0)) const
         {
         Scalar3 v = make_scalar3(w.x, w.y, w.z);
         wrap(v, img, flags);
@@ -693,7 +695,7 @@ struct
               consistent with the deforming periodic boundaries.
     */
     HOSTDEVICE void
-    wrap(Scalar3& pos, Scalar3& vel, int3& img, char3 flags = make_char3(0, 0, 0)) const
+    wrap(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, int3 HOOMD_THREAD& img, char3 flags = make_char3(0, 0, 0)) const
         {
         const Scalar3 L = getL();
 
@@ -777,7 +779,7 @@ struct
 
     //! Wrap a vec3
     HOSTDEVICE void
-    wrap(vec3<Scalar>& pos, vec3<Scalar>& vel, int3& img, char3 flags = make_char3(0, 0, 0)) const
+    wrap(vec3<Scalar> HOOMD_THREAD& pos, vec3<Scalar> HOOMD_THREAD& vel, int3 HOOMD_THREAD& img, char3 flags = make_char3(0, 0, 0)) const
         {
         Scalar3 pos_scalar = vec_to_scalar3(pos);
         Scalar3 vel_scalar = vec_to_scalar3(vel);
@@ -790,7 +792,7 @@ struct
     /*! \note The 4th element remains unchanged
      */
     HOSTDEVICE void
-    wrap(Scalar4& pos, Scalar4& vel, int3& img, char3 flags = make_char3(0, 0, 0)) const
+    wrap(Scalar4 HOOMD_THREAD& pos, Scalar4 HOOMD_THREAD& vel, int3 HOOMD_THREAD& img, char3 flags = make_char3(0, 0, 0)) const
         {
         Scalar3 p = make_scalar3(pos.x, pos.y, pos.z);
         Scalar3 v = make_scalar3(vel.x, vel.y, vel.z);
@@ -807,7 +809,7 @@ struct
     /*! \param v The vector to check
         \returns the integer coordinates of the periodic image
      */
-    HOSTDEVICE int3 getImage(const Scalar3& v) const
+    HOSTDEVICE int3 getImage(const Scalar3 HOOMD_CREF v) const
         {
         Scalar3 f = makeFraction(v) - make_scalar3(0.5, 0.5, 0.5);
         int3 img;
@@ -820,7 +822,7 @@ struct
         return img;
         }
 
-    HOSTDEVICE int3 getImage(const vec3<Scalar>& v) const
+    HOSTDEVICE int3 getImage(const vec3<Scalar> HOOMD_CREF v) const
         {
         return getImage(vec_to_scalar3(v));
         }
@@ -829,7 +831,7 @@ struct
     /*! \param v The vector to shift
         \param shift The displacement in lattice coordinates
      */
-    HOSTDEVICE Scalar3 shift(const Scalar3& v, const int3& shift) const
+    HOSTDEVICE Scalar3 shift(const Scalar3 HOOMD_CREF v, const int3 HOOMD_CREF shift) const
         {
         Scalar3 r = v;
         r += Scalar(shift.x) * getLatticeVector(0);
@@ -839,7 +841,7 @@ struct
         }
 
     //! Shift a vec3
-    HOSTDEVICE vec3<Scalar> shift(const vec3<Scalar>& v, const int3& _shift) const
+    HOSTDEVICE vec3<Scalar> shift(const vec3<Scalar> HOOMD_CREF v, const int3 HOOMD_CREF _shift) const
         {
         return vec3<Scalar>(shift(vec_to_scalar3(v), _shift));
         }
@@ -852,7 +854,7 @@ struct
               the position-only shift methods, but additionally shifts the
               velocities if required.
      */
-    HOSTDEVICE void shift(Scalar3& pos, Scalar3& vel, const int3& _shift) const
+    HOSTDEVICE void shift(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, const int3 HOOMD_CREF _shift) const
         {
         pos = shift(pos, _shift);
         vel += Scalar(_shift.x) * make_scalar3(m_L_rate.x, 0.0, 0.0);
@@ -861,7 +863,7 @@ struct
         }
 
     //! Shift a vec3
-    HOSTDEVICE void shift(vec3<Scalar>& pos, vec3<Scalar>& vel, const int3& _shift) const
+    HOSTDEVICE void shift(vec3<Scalar> HOOMD_THREAD& pos, vec3<Scalar> HOOMD_THREAD& vel, const int3 HOOMD_CREF _shift) const
         {
         Scalar3 pos_scalar = vec_to_scalar3(pos);
         Scalar3 vel_scalar = vec_to_scalar3(vel);
@@ -931,7 +933,7 @@ struct
         return make_scalar3(0.0, 0.0, 0.0);
         }
 
-    HOSTDEVICE bool operator==(const BoxDim& other) const
+    HOSTDEVICE bool operator==(const BoxDim HOOMD_CREF other) const
         {
         Scalar3 L1 = getL();
         Scalar3 L2 = other.getL();
@@ -943,10 +945,11 @@ struct
         Scalar yz1 = getTiltFactorYZ();
         Scalar yz2 = other.getTiltFactorYZ();
 
-        return L1 == L2 && xy1 == xy2 && xz1 == xz2 && yz1 == yz2;
+        return L1.x == L2.x && L1.y == L2.y && L1.z == L2.z && xy1 == xy2 && xz1 == xz2
+               && yz1 == yz2;
         }
 
-    HOSTDEVICE bool operator!=(const BoxDim& other) const
+    HOSTDEVICE bool operator!=(const BoxDim HOOMD_CREF other) const
         {
         return !((*this) == other);
         }

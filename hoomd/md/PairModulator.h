@@ -65,12 +65,12 @@ template<typename PairEvaluator, typename DirectionalEnvelope> class PairModulat
             return v;
             }
 #endif
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes)
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes)
             {
             pair_p.load_shared(ptr, available_bytes);
             }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const
             {
             pair_p.allocate_shared(ptr, available_bytes);
             }
@@ -88,12 +88,12 @@ template<typename PairEvaluator, typename DirectionalEnvelope> class PairModulat
 
     struct shape_type
         {
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes)
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes)
             {
             envelope.load_shared(ptr, available_bytes);
             }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const
             {
             envelope.allocate_shared(ptr, available_bytes);
             }
@@ -139,11 +139,11 @@ template<typename PairEvaluator, typename DirectionalEnvelope> class PairModulat
       \param _q_j Quaternion of the j^{th} particle
       \param _params Per type pair parameters of the potential
     */
-    DEVICE PairModulator(const Scalar3& _dr,
-                         const Scalar4& _q_i,
-                         const Scalar4& _q_j,
+    DEVICE PairModulator(const Scalar3 HOOMD_CREF _dr,
+                         const Scalar4 HOOMD_CREF _q_i,
+                         const Scalar4 HOOMD_CREF _q_j,
                          const Scalar _rcutsq,
-                         const param_type& _params)
+                         const param_type HOOMD_CREF _params)
         : dr(_dr), rsq(dot(_dr, _dr)), rcutsq(_rcutsq), q_i(_q_i), q_j(_q_j), params(_params),
           shape_i(nullptr), shape_j(nullptr), m_charge_i(0), m_charge_j(0)
         {
@@ -165,7 +165,7 @@ template<typename PairEvaluator, typename DirectionalEnvelope> class PairModulat
         return true;
         }
 
-    DEVICE void setShape(const shape_type* _shapei, const shape_type* _shapej)
+    DEVICE void setShape(const shape_type HOOMD_THREAD* _shapei, const shape_type HOOMD_THREAD* _shapej)
         {
         shape_i = _shapei;
         shape_j = _shapej;
@@ -193,11 +193,11 @@ template<typename PairEvaluator, typename DirectionalEnvelope> class PairModulat
       method. Cutoff tests are performed in PotentialPair. \return True if force and energy are
       evaluated, false if not because r>rcut.
     */
-    DEVICE bool evaluate(Scalar3& force,
-                         Scalar& pair_eng,
+    DEVICE bool evaluate(Scalar3 HOOMD_THREAD& force,
+                         Scalar HOOMD_THREAD& pair_eng,
                          bool energy_shift,
-                         Scalar3& torque_i,
-                         Scalar3& torque_j)
+                         Scalar3 HOOMD_THREAD& torque_i,
+                         Scalar3 HOOMD_THREAD& torque_j)
         {
         force = make_scalar3(0, 0, 0);
         pair_eng = Scalar(0);
@@ -287,11 +287,11 @@ template<typename PairEvaluator, typename DirectionalEnvelope> class PairModulat
     Scalar3 dr;
     Scalar rsq;
     Scalar rcutsq;
-    const Scalar4& q_i;
-    const Scalar4& q_j;
-    const param_type& params;
-    const shape_type* shape_i;
-    const shape_type* shape_j;
+    const Scalar4 HOOMD_CREF q_i;
+    const Scalar4 HOOMD_CREF q_j;
+    const param_type HOOMD_CREF params;
+    const shape_type HOOMD_THREAD* shape_i;
+    const shape_type HOOMD_THREAD* shape_j;
 
     Scalar m_charge_i, m_charge_j;
     };

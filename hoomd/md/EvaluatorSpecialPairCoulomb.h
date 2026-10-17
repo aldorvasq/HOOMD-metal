@@ -81,7 +81,7 @@ class EvaluatorSpecialPairCoulomb
     /*! \param _rsq Squared distance between the particles
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorSpecialPairCoulomb(Scalar _rsq, const param_type& _params)
+    DEVICE EvaluatorSpecialPairCoulomb(Scalar _rsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), scale(_params.alpha), rcutsq(_params.r_cutsq)
         {
         }
@@ -109,7 +109,7 @@ class EvaluatorSpecialPairCoulomb
                 energy is not defined. Based on EvaluatorSpecialPairLJ which
                 returns true regardless whether it is evaluated or not.
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& bond_eng)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& bond_eng)
         {
         // compute the force divided by r in force_divr
         if (rsq < rcutsq && qiqj != 0)

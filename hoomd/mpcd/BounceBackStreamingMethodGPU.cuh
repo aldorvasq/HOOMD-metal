@@ -10,6 +10,8 @@
  */
 
 #include "ParticleDataUtilities.h"
+
+#include <cuda_runtime.h>
 #include "hoomd/BoxDim.h"
 #include "hoomd/HOOMDMath.h"
 

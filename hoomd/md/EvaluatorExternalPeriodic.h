@@ -82,7 +82,7 @@ class EvaluatorExternalPeriodic
 #endif
         } __attribute__((aligned(16)));
 
-    typedef void* field_type; // dummy type
+    typedef HOOMD_GLOBAL void* field_type; // dummy type
 
     //! Constructs the constraint evaluator
     /*! \param X position of particle
@@ -91,9 +91,9 @@ class EvaluatorExternalPeriodic
     */
     DEVICE EvaluatorExternalPeriodic(Scalar3 X,
                                      quat<Scalar> q,
-                                     const BoxDim& box,
-                                     const param_type& params,
-                                     const field_type& field)
+                                     const BoxDim HOOMD_CREF box,
+                                     const param_type HOOMD_CREF params,
+                                     const field_type HOOMD_CREF field)
         : m_pos(X), m_box(box), m_index(params.i), m_orderParameter(params.A),
           m_interfaceWidth(params.w), m_periodicity(params.p)
         {
@@ -124,7 +124,7 @@ class EvaluatorExternalPeriodic
         \param virial array of six scalars for the upper triangular virial tensor
     */
     DEVICE void
-    evalForceTorqueEnergyAndVirial(Scalar3& F, Scalar3& T, Scalar& energy, Scalar* virial)
+    evalForceTorqueEnergyAndVirial(Scalar3 HOOMD_THREAD& F, Scalar3 HOOMD_THREAD& T, Scalar HOOMD_THREAD& energy, Scalar HOOMD_THREAD* virial)
         {
         Scalar3 a1 = make_scalar3(0, 0, 0);
         Scalar3 b = make_scalar3(Scalar(0.0), Scalar(0.0), Scalar(0.0));

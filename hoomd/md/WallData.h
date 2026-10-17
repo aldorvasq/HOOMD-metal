@@ -123,7 +123,7 @@ struct __attribute__((visibility("default"))) PlaneWall
 /* Returns 0 vector when all normal directions are equal
  */
 DEVICE inline Scalar3
-distVectorWallToPoint(const SphereWall& wall, const vec3<Scalar>& position, bool& in_active_space)
+distVectorWallToPoint(const SphereWall HOOMD_CREF wall, const vec3<Scalar> HOOMD_CREF position, bool HOOMD_THREAD& in_active_space)
     {
     const vec3<Scalar> dist_from_origin = position - wall.origin;
     const Scalar euclidean_dist = sqrt(dot(dist_from_origin, dist_from_origin));
@@ -141,7 +141,7 @@ distVectorWallToPoint(const SphereWall& wall, const vec3<Scalar>& position, bool
 /* Returns 0 vector when all normal directions are equal
  */
 DEVICE inline Scalar3
-distVectorWallToPoint(const CylinderWall& wall, const vec3<Scalar>& position, bool& in_active_space)
+distVectorWallToPoint(const CylinderWall HOOMD_CREF wall, const vec3<Scalar> HOOMD_CREF position, bool HOOMD_THREAD& in_active_space)
     {
     const vec3<Scalar> dist_from_origin = position - wall.origin;
     vec3<Scalar> rotated_distance = rotate(wall.quatAxisToZRot, dist_from_origin);
@@ -160,7 +160,7 @@ distVectorWallToPoint(const CylinderWall& wall, const vec3<Scalar>& position, bo
 
 //! Wall vector to point for a plane wall geometry
 DEVICE inline Scalar3
-distVectorWallToPoint(const PlaneWall& wall, const vec3<Scalar>& position, bool& in_active_space)
+distVectorWallToPoint(const PlaneWall HOOMD_CREF wall, const vec3<Scalar> HOOMD_CREF position, bool HOOMD_THREAD& in_active_space)
     {
     Scalar distance = dot(wall.normal, position) - dot(wall.normal, wall.origin);
     if (distance == 0)
@@ -174,7 +174,7 @@ distVectorWallToPoint(const PlaneWall& wall, const vec3<Scalar>& position, bool&
 
 //! Distance of point to inside sphere wall geometry, not really distance, +- based on if it's
 //! inside or not
-DEVICE inline Scalar distWall(const SphereWall& wall, const vec3<Scalar>& position)
+DEVICE inline Scalar distWall(const SphereWall HOOMD_CREF wall, const vec3<Scalar> HOOMD_CREF position)
     {
     vec3<Scalar> t = position;
     t -= wall.origin;
@@ -188,7 +188,7 @@ DEVICE inline Scalar distWall(const SphereWall& wall, const vec3<Scalar>& positi
 
 //! Distance of point to inside cylinder wall geometry, not really distance, +- based on if it's
 //! inside or not
-DEVICE inline Scalar distWall(const CylinderWall& wall, const vec3<Scalar>& position)
+DEVICE inline Scalar distWall(const CylinderWall HOOMD_CREF wall, const vec3<Scalar> HOOMD_CREF position)
     {
     vec3<Scalar> t = position;
     t -= wall.origin;
@@ -201,7 +201,7 @@ DEVICE inline Scalar distWall(const CylinderWall& wall, const vec3<Scalar>& posi
 
 //! Distance of point to inside plane wall geometry, not really distance, +- based on if it's inside
 //! or not
-DEVICE inline Scalar distWall(const PlaneWall& wall, const vec3<Scalar>& position)
+DEVICE inline Scalar distWall(const PlaneWall HOOMD_CREF wall, const vec3<Scalar> HOOMD_CREF position)
     {
     return dot(wall.normal, position) - dot(wall.normal, wall.origin);
     };

@@ -1,0 +1,24 @@
+// Copyright (c) 2009-2026 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
+
+// Stand-in for a C/C++ standard library header when preprocessing Metal Shading Language.
+#pragma once
+
+namespace std
+    {
+using metal::conditional;
+using metal::enable_if;
+using metal::false_type;
+using metal::integral_constant;
+using metal::is_floating_point;
+using metal::is_integral;
+using metal::is_same;
+using metal::remove_cv;
+using metal::remove_reference;
+using metal::true_type;
+    }
+namespace std
+    {
+using metal::make_signed;
+using metal::make_unsigned;
+    }

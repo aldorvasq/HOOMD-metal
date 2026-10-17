@@ -43,6 +43,9 @@ namespace md
 class ManifoldXYPlane
     {
     public:
+    //! Default constructor (for kernel argument structs)
+    DEVICE ManifoldXYPlane() = default;
+
     //! Constructs the manifold class
     /*! \param _shift in z direction
      */
@@ -54,7 +57,7 @@ class ManifoldXYPlane
         \return result of the nodal function at input point
     */
 
-    DEVICE Scalar implicitFunction(const Scalar3& point)
+    DEVICE Scalar implicitFunction(const Scalar3 HOOMD_CREF point)
         {
         return point.z - shift;
         }
@@ -65,12 +68,12 @@ class ManifoldXYPlane
         \return normal of the XYPlane surface at input point
     */
 
-    DEVICE Scalar3 derivative(const Scalar3& point)
+    DEVICE Scalar3 derivative(const Scalar3 HOOMD_CREF point)
         {
         return make_scalar3(0, 0, 1);
         }
 
-    DEVICE bool fitsInsideBox(const BoxDim& box)
+    DEVICE bool fitsInsideBox(const BoxDim HOOMD_CREF box)
         {
         Scalar3 lo = box.getLo();
         Scalar3 hi = box.getHi();

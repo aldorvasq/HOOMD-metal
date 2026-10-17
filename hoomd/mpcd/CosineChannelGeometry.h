@@ -97,7 +97,7 @@ class __attribute__((visibility("default"))) CosineChannelGeometry
      * is updated according to the appropriate bounce back rule, and the integration time \a dt is
      * decreased to the amount of time remaining.
      */
-    HOSTDEVICE bool detectCollision(Scalar3& pos, Scalar3& vel, Scalar& dt) const
+    HOSTDEVICE bool detectCollision(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, Scalar HOOMD_THREAD& dt) const
         {
         /*
          * Detect if particle has left the box. The sign used
@@ -264,7 +264,7 @@ class __attribute__((visibility("default"))) CosineChannelGeometry
      * \param pos Current particle position
      * \returns True if particle is out of bounds, and false otherwise
      */
-    HOSTDEVICE bool isOutside(const Scalar3& pos) const
+    HOSTDEVICE bool isOutside(const Scalar3 HOOMD_CREF pos) const
         {
         Scalar a = pos.y - m_amplitude * fast::cos(m_wavenumber * pos.x);
         return (a > m_H || a < -m_H);
@@ -277,7 +277,7 @@ class __attribute__((visibility("default"))) CosineChannelGeometry
      *
      * No velocity contribution is needed as the wall is stationary.
      */
-    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3& vel, const Scalar3& pos) const { }
+    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3 HOOMD_THREAD& vel, const Scalar3 HOOMD_CREF pos) const { }
 
     //! Get channel amplitude
     HOSTDEVICE Scalar getAmplitude() const

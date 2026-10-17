@@ -40,6 +40,21 @@
 #define DEVICE
 #endif
 
+// Address space qualifiers for code shared with the Metal Shading Language. MSL requires an address
+// space on every pointer and reference: HOOMD_THREAD marks thread-local data, HOOMD_SHARED marks
+// shared (threadgroup) memory, and HOOMD_GLOBAL marks global (device) memory. HOOMD_CONSTANT marks
+// namespace scope constants. They are empty in C++. Read-only parameters use HOOMD_CREF in place of
+// '&': a const reference in C++ and pass by value in MSL, so that arguments may come from any
+// address space.
+#ifndef __METAL_VERSION__
+#define HOOMD_THREAD
+#define HOOMD_SHARED
+#define HOOMD_GLOBAL
+#define HOOMD_CONSTANT
+#define HOOMD_CREF &
+#define HOOMD_SHARED_REF &
+#endif
+
 namespace hoomd
     {
 #ifndef ENABLE_HIP
@@ -142,6 +157,7 @@ HOSTDEVICE inline float __int_as_float(int a)
     }
 #endif // __HIPCC__
 
+#ifndef __METAL_VERSION__
 //! Stuff an integer inside a double
 HOSTDEVICE inline double __int_as_double(int a)
     {
@@ -156,6 +172,7 @@ HOSTDEVICE inline double __int_as_double(int a)
 
     return u.b;
     }
+#endif // __METAL_VERSION__
 
 //! Stuff an integer inside a Scalar
 HOSTDEVICE inline Scalar __int_as_scalar(int a)
@@ -187,6 +204,7 @@ HOSTDEVICE inline int __float_as_int(float b)
     }
 #endif // __HIPCC__
 
+#ifndef __METAL_VERSION__
 //! Extract an integer from a double stuffed by __int_as_double()
 HOSTDEVICE inline int __double_as_int(double b)
     {
@@ -199,6 +217,7 @@ HOSTDEVICE inline int __double_as_int(double b)
 
     return u.a;
     }
+#endif // __METAL_VERSION__
 
 //! Extract an integer from a Scalar stuffed by __int_as_scalar()
 HOSTDEVICE inline int __scalar_as_int(Scalar b)
@@ -212,6 +231,17 @@ HOSTDEVICE inline int __scalar_as_int(Scalar b)
 
     return u.a;
     }
+
+#ifdef __METAL_VERSION__
+//! Dot product of Scalar3 values
+/*! MSL vectors are built-in types without associated namespaces, so metal::dot is hidden by the
+    vec3 overloads of hoomd::dot inside namespace hoomd.
+*/
+inline Scalar dot(Scalar3 a, Scalar3 b)
+    {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+#endif
 
 //! Export relevant hoomd math functions to python
 #ifndef __HIPCC__
@@ -239,12 +269,15 @@ inline HOSTDEVICE float rsqrt(float x)
     return ::__frsqrt_rn(x);
 #elif defined(__HIP_PLATFORM_AMD__)
     return ::__frsqrt_rn(x);
+#elif defined(__HIP_PLATFORM_METAL__)
+    return metal::fast::rsqrt(x);
 #endif
 #else
     return 1.0f / ::sqrtf(x);
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the reciprocal square root of x
 inline HOSTDEVICE double rsqrt(double x)
     {
@@ -254,6 +287,7 @@ inline HOSTDEVICE double rsqrt(double x)
     return 1.0 / ::sqrt(x);
 #endif
     }
+#endif
 
 //! Compute the sin of x
 inline HOSTDEVICE float sin(float x)
@@ -265,11 +299,13 @@ inline HOSTDEVICE float sin(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the sin of x
 inline HOSTDEVICE double sin(double x)
     {
     return ::sin(x);
     }
+#endif
 
 //! Compute the cos of x
 inline HOSTDEVICE float cos(float x)
@@ -281,14 +317,16 @@ inline HOSTDEVICE float cos(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the cos of x
 inline HOSTDEVICE double cos(double x)
     {
     return ::cos(x);
     }
+#endif
 
 //! Compute both of sin of x and cos of x with float precision
-inline HOSTDEVICE void sincos(float x, float& s, float& c)
+inline HOSTDEVICE void sincos(float x, float HOOMD_THREAD& s, float HOOMD_THREAD& c)
     {
 #if defined(__HIP_DEVICE_COMPILE__) || defined(__APPLE__)
     __sincosf(x, &s, &c);
@@ -297,6 +335,7 @@ inline HOSTDEVICE void sincos(float x, float& s, float& c)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute both of sin of x and cos of x with double precision
 inline HOSTDEVICE void sincos(double x, double& s, double& c)
     {
@@ -308,9 +347,10 @@ inline HOSTDEVICE void sincos(double x, double& s, double& c)
     ::sincos(x, &s, &c);
 #endif
     }
+#endif
 
 //! Compute both of sin of x and cos of PI * x with float precision
-inline HOSTDEVICE void sincospi(float x, float& s, float& c)
+inline HOSTDEVICE void sincospi(float x, float HOOMD_THREAD& s, float HOOMD_THREAD& c)
     {
 #if defined(__HIP_DEVICE_COMPILE__)
     ::sincospif(x, &s, &c);
@@ -321,6 +361,7 @@ inline HOSTDEVICE void sincospi(float x, float& s, float& c)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute both of sin of x and cos of x with double precision
 inline HOSTDEVICE void sincospi(double x, double& s, double& c)
     {
@@ -332,6 +373,7 @@ inline HOSTDEVICE void sincospi(double x, double& s, double& c)
     fast::sincos(M_PI * x, s, c);
 #endif
     }
+#endif
 
 //! Compute the pow of x,y with single precison via exp(log) refactoring - NOTE: UNDEFINED FOR
 //! NEGATIVE BASES
@@ -344,13 +386,16 @@ inline HOSTDEVICE float pow(float x, float y)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the pow of x,y with double precision via exp(log) refactoring - NOTE: UNDEFINED FOR
 //! NEGATIVE BASES
 inline HOSTDEVICE double pow(double x, double y)
     {
     return ::exp(y * log(x));
     }
+#endif
 
+#ifndef __METAL_VERSION__
 //! Compute the pow of x,y in double precision when y is an integer using squaring
 inline HOSTDEVICE double pow(double x, unsigned int y)
     {
@@ -366,7 +411,9 @@ inline HOSTDEVICE double pow(double x, unsigned int y)
         }
     return result;
     }
+#endif
 
+#ifndef __METAL_VERSION__
 inline HOSTDEVICE double pow(double x, int y)
     {
     unsigned int _y = abs(y);
@@ -375,6 +422,7 @@ inline HOSTDEVICE double pow(double x, int y)
     else
         return pow(x, _y);
     }
+#endif
 
 //! Compute the pow of x,y in single precision when y is an integer using squaring
 inline HOSTDEVICE float pow(float x, unsigned int y)
@@ -411,11 +459,13 @@ inline HOSTDEVICE float exp(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the exp of x
 inline HOSTDEVICE double exp(double x)
     {
     return ::exp(x);
     }
+#endif
 
 //! Compute the natural log of x
 inline HOSTDEVICE float log(float x)
@@ -427,11 +477,13 @@ inline HOSTDEVICE float log(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the natural log of x
 inline HOSTDEVICE double log(double x)
     {
     return ::log(x);
     }
+#endif
 
 //! Compute the sqrt of x
 inline HOSTDEVICE float sqrt(float x)
@@ -443,11 +495,13 @@ inline HOSTDEVICE float sqrt(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the sqrt of x
 inline HOSTDEVICE double sqrt(double x)
     {
     return ::sqrt(x);
     }
+#endif
 
 //! Compute the erfc of x
 inline HOSTDEVICE float erfc(float x)
@@ -455,11 +509,13 @@ inline HOSTDEVICE float erfc(float x)
     return ::erfcf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the erfc of x
 inline HOSTDEVICE double erfc(double x)
     {
     return ::erfc(x);
     }
+#endif
 
 //! Compute the acos of x
 inline HOSTDEVICE float acos(float x)
@@ -467,11 +523,13 @@ inline HOSTDEVICE float acos(float x)
     return ::acosf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the acos of x
 inline HOSTDEVICE double acos(double x)
     {
     return ::acos(x);
     }
+#endif
     } // namespace fast
 
 //! Maximum accuracy math routines
@@ -494,6 +552,7 @@ inline HOSTDEVICE float rsqrt(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the reciprocal square root of x
 inline HOSTDEVICE double rsqrt(double x)
     {
@@ -503,6 +562,7 @@ inline HOSTDEVICE double rsqrt(double x)
     return 1.0 / ::sqrt(x);
 #endif
     }
+#endif
 
 //! Compute the sin of x
 inline HOSTDEVICE float sin(float x)
@@ -514,11 +574,13 @@ inline HOSTDEVICE float sin(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the sin of x
 inline HOSTDEVICE double sin(double x)
     {
     return ::sin(x);
     }
+#endif
 
 //! Compute the cos of x
 inline HOSTDEVICE float cos(float x)
@@ -530,11 +592,13 @@ inline HOSTDEVICE float cos(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the cos of x
 inline HOSTDEVICE double cos(double x)
     {
     return ::cos(x);
     }
+#endif
 
 //! Compute the tan of x
 inline HOSTDEVICE float tan(float x)
@@ -542,11 +606,13 @@ inline HOSTDEVICE float tan(float x)
     return ::tanf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the tan of x
 inline HOSTDEVICE double tan(double x)
     {
     return ::tan(x);
     }
+#endif
 
 //! Compute the pow of x,y
 inline HOSTDEVICE float pow(float x, float y)
@@ -558,11 +624,13 @@ inline HOSTDEVICE float pow(float x, float y)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the sin of x
 inline HOSTDEVICE double pow(double x, double y)
     {
     return ::pow(x, y);
     }
+#endif
 
 //! Compute the exp of x
 inline HOSTDEVICE float exp(float x)
@@ -574,11 +642,13 @@ inline HOSTDEVICE float exp(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the exp of x
 inline HOSTDEVICE double exp(double x)
     {
     return ::exp(x);
     }
+#endif
 
 //! Compute the natural log of x
 inline HOSTDEVICE float log(float x)
@@ -590,11 +660,13 @@ inline HOSTDEVICE float log(float x)
 #endif
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the natural log of x
 inline HOSTDEVICE double log(double x)
     {
     return ::log(x);
     }
+#endif
 
 //! Compute the sqrt of x
 inline HOSTDEVICE float sqrt(float x)
@@ -602,11 +674,13 @@ inline HOSTDEVICE float sqrt(float x)
     return ::sqrtf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the sqrt of x
 inline HOSTDEVICE double sqrt(double x)
     {
     return ::sqrt(x);
     }
+#endif
 
 //! Compute the erfc of x
 inline HOSTDEVICE float erfc(float x)
@@ -614,11 +688,13 @@ inline HOSTDEVICE float erfc(float x)
     return ::erfcf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the erfc of x
 inline HOSTDEVICE double erfc(double x)
     {
     return ::erfc(x);
     }
+#endif
 
 //! Compute the acos of x
 inline HOSTDEVICE float acos(float x)
@@ -626,11 +702,13 @@ inline HOSTDEVICE float acos(float x)
     return ::acosf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the acos of x
 inline HOSTDEVICE double acos(double x)
     {
     return ::acos(x);
     }
+#endif
 
 //! Compute the atan of x
 inline HOSTDEVICE float atan(float x)
@@ -638,11 +716,13 @@ inline HOSTDEVICE float atan(float x)
     return ::atanf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the atan of x
 inline HOSTDEVICE double atan(double x)
     {
     return ::atan(x);
     }
+#endif
 
 //! Compute the floor of x
 inline HOSTDEVICE float floor(float x)
@@ -650,17 +730,21 @@ inline HOSTDEVICE float floor(float x)
     return ::floorf(x);
     }
 
+#ifndef __METAL_VERSION__
 //! Compute the floor of x
 inline HOSTDEVICE double floor(double x)
     {
     return ::floor(x);
     }
+#endif
 
+#ifndef __METAL_VERSION__
 /// Compute the hypberbolic tangent of x
 inline HOSTDEVICE double tanh(double x)
     {
     return ::tanh(x);
     }
+#endif
 
 /// Compute the hypberbolic tangent of x
 inline HOSTDEVICE float tanh(float x)
@@ -668,11 +752,13 @@ inline HOSTDEVICE float tanh(float x)
     return ::tanhf(x);
     }
 
+#ifndef __METAL_VERSION__
 /// Compute the rint of x
 inline HOSTDEVICE double rint(double x)
     {
     return ::rint(x);
     }
+#endif
 
 /// Compute the rint of x
 inline HOSTDEVICE float rint(float x)
@@ -684,6 +770,8 @@ inline HOSTDEVICE float rint(float x)
     } // end namespace hoomd
 
 // ------------ Vector math functions --------------------------
+// The Metal Shading Language provides these operators for its vector types.
+#ifndef __METAL_VERSION__
 //! Comparison operator needed for export of std::vector<uint2>
 HOSTDEVICE inline bool operator==(const uint2& a, const uint2& b)
     {
@@ -720,7 +808,7 @@ HOSTDEVICE inline hoomd::Scalar3 operator+(const hoomd::Scalar3& a, const hoomd:
     return hoomd::make_scalar3(a.x + b.x, a.y + b.y, a.z + b.z);
     }
 
-#if !defined(ENABLE_HIP) || defined(__HIP_PLATFORM_NVCC__)
+#if !defined(ENABLE_HIP) || defined(__HIP_PLATFORM_NVCC__) || defined(__HIP_PLATFORM_METAL__)
 //! Vector addition
 HOSTDEVICE inline hoomd::Scalar3& operator+=(hoomd::Scalar3& a, const hoomd::Scalar3& b)
     {
@@ -856,6 +944,8 @@ HOSTDEVICE inline bool operator!=(const int3& a, const int3& b)
     {
     return (a.x != b.x || a.y != b.y || a.z != b.z);
     }
+
+#endif // __METAL_VERSION__
 
 // undefine HOSTDEVICE so we don't interfere with other headers
 #undef HOSTDEVICE

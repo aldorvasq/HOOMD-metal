@@ -44,29 +44,33 @@ template<class Real> struct vec3
         \param _y y-component
         \param _z z-component
     */
-    DEVICE vec3(const Real& _x, const Real& _y, const Real& _z) : x(_x), y(_y), z(_z) { }
+    DEVICE vec3(const Real HOOMD_CREF _x, const Real HOOMD_CREF _y, const Real HOOMD_CREF _z) : x(_x), y(_y), z(_z) { }
 
     //! Construct a vec3 from a Scalar3
     /*! \param a Scalar3 to copy
         This is a convenience function for easy initialization of vec3s from hoomd memory data
        structures
     */
-    DEVICE explicit vec3(const Scalar3& a) : x(Real(a.x)), y(Real(a.y)), z(Real(a.z)) { }
+    DEVICE explicit vec3(const Scalar3 HOOMD_CREF a) : x(Real(a.x)), y(Real(a.y)), z(Real(a.z)) { }
 
     //! Construct a vec3 from a Scalar4
     /*! \param a Scalar4 to copy
         This is a convenience function for easy initialization of vec3s from hoomd memory data
        structures. \note It drops the w component.
     */
-    DEVICE explicit vec3(const Scalar4& a) : x(a.x), y(a.y), z(a.z) { }
+    DEVICE explicit vec3(const Scalar4 HOOMD_CREF a) : x(a.x), y(a.y), z(a.z) { }
 
+#ifndef __METAL_VERSION__
     //! Implicit cast from vec3<double> to the current Real
-    DEVICE vec3(const vec3<double>& a) : x(Real(a.x)), y(Real(a.y)), z(Real(a.z)) { }
+    DEVICE vec3(const vec3<double> HOOMD_CREF a) : x(Real(a.x)), y(Real(a.y)), z(Real(a.z)) { }
+#endif
 
+#ifndef __METAL_VERSION__ // these are copy constructors in single precision
     //! Implicit cast from vec3<float> to the current Real
-    DEVICE vec3(const vec3<float>& a) : x(a.x), y(a.y), z(a.z) { }
+    DEVICE vec3(const vec3<float> HOOMD_CREF a) : x(a.x), y(a.y), z(a.z) { }
+#endif
 
-    DEVICE Real& operator[](unsigned int i)
+    DEVICE Real HOOMD_THREAD& operator[](unsigned int i)
         {
         switch (i)
             {
@@ -122,7 +126,7 @@ template<class Real> struct vec3
     DEVICE vec3() : x(0), y(0), z(0) { }
 
     //! Swap with another vector
-    DEVICE void swap(vec3<Real>& v)
+    DEVICE void swap(vec3<Real> HOOMD_THREAD& v)
         {
         Real tx, ty, tz;
         tx = v.x;
@@ -148,7 +152,7 @@ template<class Real> struct vec3
     Addition is component wise.
     \returns The vector (a.x+b.x, a.y+b.y, a.z+b.z).
 */
-template<class Real> DEVICE inline vec3<Real> operator+(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> operator+(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return vec3<Real>(a.x + b.x, a.y + b.y, a.z + b.z);
     }
@@ -160,7 +164,7 @@ template<class Real> DEVICE inline vec3<Real> operator+(const vec3<Real>& a, con
     Subtraction is component wise.
     \returns The vector (a.x-b.x, a.y-b.y, a.z-b.z).
 */
-template<class Real> DEVICE inline vec3<Real> operator-(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> operator-(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return vec3<Real>(a.x - b.x, a.y - b.y, a.z - b.z);
     }
@@ -172,7 +176,7 @@ template<class Real> DEVICE inline vec3<Real> operator-(const vec3<Real>& a, con
     Multiplication is component wise.
     \returns The vector (a.x*b.x, a.y*b.y, a.z*b.z).
 */
-template<class Real> DEVICE inline vec3<Real> operator*(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> operator*(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return vec3<Real>(a.x * b.x, a.y * b.y, a.z * b.z);
     }
@@ -184,7 +188,7 @@ template<class Real> DEVICE inline vec3<Real> operator*(const vec3<Real>& a, con
     Division is component wise.
     \returns The vector (a.x/b.x, a.y/b.y, a.z/b.z).
 */
-template<class Real> DEVICE inline vec3<Real> operator/(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> operator/(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return vec3<Real>(a.x / b.x, a.y / b.y, a.z / b.z);
     }
@@ -195,7 +199,7 @@ template<class Real> DEVICE inline vec3<Real> operator/(const vec3<Real>& a, con
     Negation is component wise.
     \returns The vector (-a.x, -a.y, -a.z).
 */
-template<class Real> DEVICE inline vec3<Real> operator-(const vec3<Real>& a)
+template<class Real> DEVICE inline vec3<Real> operator-(const vec3<Real> HOOMD_CREF a)
     {
     return vec3<Real>(-a.x, -a.y, -a.z);
     }
@@ -207,7 +211,7 @@ template<class Real> DEVICE inline vec3<Real> operator-(const vec3<Real>& a)
     Addition is component wise.
     \returns The vector (a.x += b.x, a.y += b.y, a.z += b.z).
 */
-template<class Real> DEVICE inline vec3<Real>& operator+=(vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> HOOMD_THREAD& operator+=(vec3<Real> HOOMD_THREAD& a, const vec3<Real> HOOMD_CREF b)
     {
     a.x += b.x;
     a.y += b.y;
@@ -222,7 +226,7 @@ template<class Real> DEVICE inline vec3<Real>& operator+=(vec3<Real>& a, const v
     Subtraction is component wise.
     \returns The vector (a.x -= b.x, a.y -= b.y, a.z -= b.z).
 */
-template<class Real> DEVICE inline vec3<Real>& operator-=(vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> HOOMD_THREAD& operator-=(vec3<Real> HOOMD_THREAD& a, const vec3<Real> HOOMD_CREF b)
     {
     a.x -= b.x;
     a.y -= b.y;
@@ -237,7 +241,7 @@ template<class Real> DEVICE inline vec3<Real>& operator-=(vec3<Real>& a, const v
     Multiplication is component wise.
     \returns The vector (a.x *= b.x, a.y *= b.y, a.z *= b.z).
 */
-template<class Real> DEVICE inline vec3<Real>& operator*=(vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> HOOMD_THREAD& operator*=(vec3<Real> HOOMD_THREAD& a, const vec3<Real> HOOMD_CREF b)
     {
     a.x *= b.x;
     a.y *= b.y;
@@ -252,7 +256,7 @@ template<class Real> DEVICE inline vec3<Real>& operator*=(vec3<Real>& a, const v
     Division is component wise.
     \returns The vector (a.x /= b.x, a.y /= b.y, a.z /= b.z).
 */
-template<class Real> DEVICE inline vec3<Real>& operator/=(vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> HOOMD_THREAD& operator/=(vec3<Real> HOOMD_THREAD& a, const vec3<Real> HOOMD_CREF b)
     {
     a.x /= b.x;
     a.y /= b.y;
@@ -267,7 +271,7 @@ template<class Real> DEVICE inline vec3<Real>& operator/=(vec3<Real>& a, const v
     Multiplication is component wise.
     \returns The vector (a.x*b, a.y*b, a.z*b).
 */
-template<class Real> DEVICE inline vec3<Real> operator*(const vec3<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec3<Real> operator*(const vec3<Real> HOOMD_CREF a, const Real HOOMD_CREF b)
     {
     return vec3<Real>(a.x * b, a.y * b, a.z * b);
     }
@@ -279,7 +283,7 @@ template<class Real> DEVICE inline vec3<Real> operator*(const vec3<Real>& a, con
     Multiplication is component wise.
     \returns The vector (a.x*b, a.y*b, a.z*b).
 */
-template<class Real> DEVICE inline vec3<Real> operator*(const Real& b, const vec3<Real>& a)
+template<class Real> DEVICE inline vec3<Real> operator*(const Real HOOMD_CREF b, const vec3<Real> HOOMD_CREF a)
     {
     return vec3<Real>(a.x * b, a.y * b, a.z * b);
     }
@@ -291,7 +295,7 @@ template<class Real> DEVICE inline vec3<Real> operator*(const Real& b, const vec
     Division is component wise.
     \returns The vector (a.x/b, a.y/b, a.z/b).
 */
-template<class Real> DEVICE inline vec3<Real> operator/(const vec3<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec3<Real> operator/(const vec3<Real> HOOMD_CREF a, const Real HOOMD_CREF b)
     {
     Real q = Real(1.0) / b;
     return a * q;
@@ -304,7 +308,7 @@ template<class Real> DEVICE inline vec3<Real> operator/(const vec3<Real>& a, con
     Multiplication is component wise.
     \returns The vector (a.x *= b, a.y *= b, a.z *= b).
 */
-template<class Real> DEVICE inline vec3<Real>& operator*=(vec3<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec3<Real> HOOMD_THREAD& operator*=(vec3<Real> HOOMD_THREAD& a, const Real HOOMD_CREF b)
     {
     a.x *= b;
     a.y *= b;
@@ -319,7 +323,7 @@ template<class Real> DEVICE inline vec3<Real>& operator*=(vec3<Real>& a, const R
     Division is component wise.
     \returns The vector (a.x /= b, a.y /= b, a.z /= b).
 */
-template<class Real> DEVICE inline vec3<Real>& operator/=(vec3<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec3<Real> HOOMD_THREAD& operator/=(vec3<Real> HOOMD_THREAD& a, const Real HOOMD_CREF b)
     {
     a.x /= b;
     a.y /= b;
@@ -332,7 +336,7 @@ template<class Real> DEVICE inline vec3<Real>& operator/=(vec3<Real>& a, const R
     \param b Second vector
     \returns true if the two vectors are identically equal, false if they are not
 */
-template<class Real> DEVICE inline bool operator==(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline bool operator==(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return (a.x == b.x) && (a.y == b.y) && (a.z == b.z);
     }
@@ -342,7 +346,7 @@ template<class Real> DEVICE inline bool operator==(const vec3<Real>& a, const ve
     \param b Second vector
     \returns true if the two vectors are not identically equal, and false if they are
 */
-template<class Real> DEVICE inline bool operator!=(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline bool operator!=(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return (a.x != b.x) || (a.y != b.y) || (a.z != b.z);
     }
@@ -353,7 +357,7 @@ template<class Real> DEVICE inline bool operator!=(const vec3<Real>& a, const ve
 
     \returns the dot product a.x*b.x + a.y*b.y + a.z*b.z.
 */
-template<class Real> DEVICE inline Real dot(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline Real dot(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return (a.x * b.x + a.y * b.y + a.z * b.z);
     }
@@ -365,7 +369,7 @@ template<class Real> DEVICE inline Real dot(const vec3<Real>& a, const vec3<Real
     \returns the cross product (a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y *
    b.x).
 */
-template<class Real> DEVICE inline vec3<Real> cross(const vec3<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> cross(const vec3<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return vec3<Real>(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
     }
@@ -375,20 +379,20 @@ template<class Real> DEVICE inline vec3<Real> cross(const vec3<Real>& a, const v
 
     \returns A normal vector in the direction of *a*.
 */
-template<class Real> DEVICE inline vec3<Real> normalize(const vec3<Real>& a)
+template<class Real> DEVICE inline vec3<Real> normalize(const vec3<Real> HOOMD_CREF a)
     {
     Real inverse_norm = fast::rsqrt(dot(a, a));
     return a * inverse_norm;
     }
 
 //! Convenience function for converting a vec3 to a Scalar3
-DEVICE inline Scalar3 vec_to_scalar3(const vec3<Scalar>& a)
+DEVICE inline Scalar3 vec_to_scalar3(const vec3<Scalar> HOOMD_CREF a)
     {
     return make_scalar3(a.x, a.y, a.z);
     }
 
 //! Convenience function for converting a vec3 and a w to a Scalar4
-DEVICE inline Scalar4 vec_to_scalar4(const vec3<Scalar>& a, Scalar w)
+DEVICE inline Scalar4 vec_to_scalar4(const vec3<Scalar> HOOMD_CREF a, Scalar w)
     {
     return make_scalar4(a.x, a.y, a.z, w);
     }
@@ -410,19 +414,23 @@ template<class Real> struct vec2
     /*! \param _x x-component
         \param _y y-component
     */
-    DEVICE vec2(const Real& _x, const Real& _y) : x(_x), y(_y) { }
+    DEVICE vec2(const Real HOOMD_CREF _x, const Real HOOMD_CREF _y) : x(_x), y(_y) { }
 
     //! Default construct a 0 vector
     DEVICE vec2() : x(0), y(0) { }
 
+#ifndef __METAL_VERSION__
     //! Implicit cast from vec2<double> to the current Real
-    DEVICE vec2(const vec2<double>& a) : x(Real(a.x)), y(Real(a.y)) { }
+    DEVICE vec2(const vec2<double> HOOMD_CREF a) : x(Real(a.x)), y(Real(a.y)) { }
+#endif
 
+#ifndef __METAL_VERSION__ // these are copy constructors in single precision
     //! Implicit cast from vec2<float> to the current Real
-    DEVICE vec2(const vec2<float>& a) : x(a.x), y(a.y) { }
+    DEVICE vec2(const vec2<float> HOOMD_CREF a) : x(a.x), y(a.y) { }
+#endif
 
     //! Swap with another vector
-    DEVICE void swap(vec2<Real>& v)
+    DEVICE void swap(vec2<Real> HOOMD_THREAD& v)
         {
         Real tx, ty;
         tx = v.x;
@@ -444,7 +452,7 @@ template<class Real> struct vec2
     Addition is component wise.
     \returns The vector (a.x+b.x, a.y+b.y).
 */
-template<class Real> DEVICE inline vec2<Real> operator+(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> operator+(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return vec2<Real>(a.x + b.x, a.y + b.y);
     }
@@ -456,7 +464,7 @@ template<class Real> DEVICE inline vec2<Real> operator+(const vec2<Real>& a, con
     Subtraction is component wise.
     \returns The vector (a.x-b.x, a.y-b.y).
 */
-template<class Real> DEVICE inline vec2<Real> operator-(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> operator-(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return vec2<Real>(a.x - b.x, a.y - b.y);
     }
@@ -468,7 +476,7 @@ template<class Real> DEVICE inline vec2<Real> operator-(const vec2<Real>& a, con
     Multiplication is component wise.
     \returns The vector (a.x*b.x, a.y*b.y).
 */
-template<class Real> DEVICE inline vec2<Real> operator*(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> operator*(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return vec2<Real>(a.x * b.x, a.y * b.y);
     }
@@ -480,7 +488,7 @@ template<class Real> DEVICE inline vec2<Real> operator*(const vec2<Real>& a, con
     Division is component wise.
     \returns The vector (a.x/b.x, a.y/b.y).
 */
-template<class Real> DEVICE inline vec2<Real> operator/(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> operator/(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return vec2<Real>(a.x / b.x, a.y / b.y);
     }
@@ -491,7 +499,7 @@ template<class Real> DEVICE inline vec2<Real> operator/(const vec2<Real>& a, con
     Negation is component wise.
     \returns The vector (-a.x, -a.y).
 */
-template<class Real> DEVICE inline vec2<Real> operator-(const vec2<Real>& a)
+template<class Real> DEVICE inline vec2<Real> operator-(const vec2<Real> HOOMD_CREF a)
     {
     return vec2<Real>(-a.x, -a.y);
     }
@@ -503,7 +511,7 @@ template<class Real> DEVICE inline vec2<Real> operator-(const vec2<Real>& a)
     Addition is component wise.
     \returns The vector (a.x += b.x, a.y += b.y).
 */
-template<class Real> DEVICE inline vec2<Real>& operator+=(vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> HOOMD_THREAD& operator+=(vec2<Real> HOOMD_THREAD& a, const vec2<Real> HOOMD_CREF b)
     {
     a.x += b.x;
     a.y += b.y;
@@ -517,7 +525,7 @@ template<class Real> DEVICE inline vec2<Real>& operator+=(vec2<Real>& a, const v
     Subtraction is component wise.
     \returns The vector (a.x -= b.x, a.y -= b.y).
 */
-template<class Real> DEVICE inline vec2<Real>& operator-=(vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> HOOMD_THREAD& operator-=(vec2<Real> HOOMD_THREAD& a, const vec2<Real> HOOMD_CREF b)
     {
     a.x -= b.x;
     a.y -= b.y;
@@ -531,7 +539,7 @@ template<class Real> DEVICE inline vec2<Real>& operator-=(vec2<Real>& a, const v
     Multiplication is component wise.
     \returns The vector (a.x *= b.x, a.y *= b.y).
 */
-template<class Real> DEVICE inline vec2<Real>& operator*=(vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> HOOMD_THREAD& operator*=(vec2<Real> HOOMD_THREAD& a, const vec2<Real> HOOMD_CREF b)
     {
     a.x *= b.x;
     a.y *= b.y;
@@ -545,7 +553,7 @@ template<class Real> DEVICE inline vec2<Real>& operator*=(vec2<Real>& a, const v
     Division is component wise.
     \returns The vector (a.x /= b.x, a.y /= b.y).
 */
-template<class Real> DEVICE inline vec2<Real>& operator/=(vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> HOOMD_THREAD& operator/=(vec2<Real> HOOMD_THREAD& a, const vec2<Real> HOOMD_CREF b)
     {
     a.x /= b.x;
     a.y /= b.y;
@@ -559,7 +567,7 @@ template<class Real> DEVICE inline vec2<Real>& operator/=(vec2<Real>& a, const v
     Multiplication is component wise.
     \returns The vector (a.x*b, a.y*b).
 */
-template<class Real> DEVICE inline vec2<Real> operator*(const vec2<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec2<Real> operator*(const vec2<Real> HOOMD_CREF a, const Real HOOMD_CREF b)
     {
     return vec2<Real>(a.x * b, a.y * b);
     }
@@ -571,7 +579,7 @@ template<class Real> DEVICE inline vec2<Real> operator*(const vec2<Real>& a, con
     Multiplication is component wise.
     \returns The vector (a.x*b, a.y*b).
 */
-template<class Real> DEVICE inline vec2<Real> operator*(const Real& b, const vec2<Real>& a)
+template<class Real> DEVICE inline vec2<Real> operator*(const Real HOOMD_CREF b, const vec2<Real> HOOMD_CREF a)
     {
     return vec2<Real>(a.x * b, a.y * b);
     }
@@ -583,7 +591,7 @@ template<class Real> DEVICE inline vec2<Real> operator*(const Real& b, const vec
     Division is component wise.
     \returns The vector (a.x/b, a.y/b, a.z/b).
 */
-template<class Real> DEVICE inline vec2<Real> operator/(const vec2<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec2<Real> operator/(const vec2<Real> HOOMD_CREF a, const Real HOOMD_CREF b)
     {
     Real q = Real(1.0) / b;
     return a * q;
@@ -596,7 +604,7 @@ template<class Real> DEVICE inline vec2<Real> operator/(const vec2<Real>& a, con
     Multiplication is component wise.
     \returns The vector (a.x *= b, a.y *= b).
 */
-template<class Real> DEVICE inline vec2<Real>& operator*=(vec2<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec2<Real> HOOMD_THREAD& operator*=(vec2<Real> HOOMD_THREAD& a, const Real HOOMD_CREF b)
     {
     a.x *= b;
     a.y *= b;
@@ -610,7 +618,7 @@ template<class Real> DEVICE inline vec2<Real>& operator*=(vec2<Real>& a, const R
     Division is component wise.
     \returns The vector (a.x /= b, a.y /= b).
 */
-template<class Real> DEVICE inline vec2<Real>& operator/=(vec2<Real>& a, const Real& b)
+template<class Real> DEVICE inline vec2<Real> HOOMD_THREAD& operator/=(vec2<Real> HOOMD_THREAD& a, const Real HOOMD_CREF b)
     {
     a.x /= b;
     a.y /= b;
@@ -622,7 +630,7 @@ template<class Real> DEVICE inline vec2<Real>& operator/=(vec2<Real>& a, const R
     \param b Second vector
     \returns true if the two vectors are identically equal, false if they are not
 */
-template<class Real> DEVICE inline bool operator==(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline bool operator==(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return (a.x == b.x) && (a.y == b.y);
     }
@@ -632,7 +640,7 @@ template<class Real> DEVICE inline bool operator==(const vec2<Real>& a, const ve
     \param b Second vector
     \returns true if the two vectors are not identically equal, false if they are
 */
-template<class Real> DEVICE inline bool operator!=(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline bool operator!=(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return (a.x != b.x) || (a.y != b.y);
     }
@@ -643,7 +651,7 @@ template<class Real> DEVICE inline bool operator!=(const vec2<Real>& a, const ve
 
     \returns the dot product a.x*b.x + a.y*b.y.
 */
-template<class Real> DEVICE inline Real dot(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline Real dot(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return (a.x * b.x + a.y * b.y);
     }
@@ -652,7 +660,7 @@ template<class Real> DEVICE inline Real dot(const vec2<Real>& a, const vec2<Real
 /*! \param a vector
     \returns a vector perpendicular to *a* (a.y, -a.x)
 */
-template<class Real> DEVICE inline vec2<Real> perp(const vec2<Real>& a)
+template<class Real> DEVICE inline vec2<Real> perp(const vec2<Real> HOOMD_CREF a)
     {
     return vec2<Real>(-a.y, a.x);
     }
@@ -662,7 +670,7 @@ template<class Real> DEVICE inline vec2<Real> perp(const vec2<Real>& a)
     \param b second vector
     \returns the perpendicular dot product of a and b
 */
-template<class Real> DEVICE inline Real perpdot(const vec2<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline Real perpdot(const vec2<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     return dot(perp(a), b);
     }
@@ -672,7 +680,7 @@ template<class Real> DEVICE inline Real perpdot(const vec2<Real>& a, const vec2<
 
     \returns A normal vector in the direction of *a*.
 */
-template<class Real> DEVICE inline vec2<Real> normalize(const vec2<Real>& a)
+template<class Real> DEVICE inline vec2<Real> normalize(const vec2<Real> HOOMD_CREF a)
     {
     Real inverse_norm = fast::rsqrt(dot(a, a));
     return a * inverse_norm;
@@ -716,7 +724,7 @@ template<class Real> struct quat
     /*! \param _s scalar component
         \param _v vector component
     */
-    DEVICE quat(const Real& _s, const vec3<Real>& _v) : s(_s), v(_v) { }
+    DEVICE quat(const Real HOOMD_CREF _s, const vec3<Real> HOOMD_CREF _v) : s(_s), v(_v) { }
 
     //! Construct a quat from a Scalar4
     /*! \param a Scalar4 to copy
@@ -727,22 +735,26 @@ template<class Real> struct quat
         \note For some unfathomable reason, hoomd stores a quaternion as (x, (y,z,w)). Be aware of
        this when using the data elsewhere.
     */
-    DEVICE explicit quat(const Scalar4& a)
+    DEVICE explicit quat(const Scalar4 HOOMD_CREF a)
         : s((Real)a.x), v(vec3<Real>((Real)a.y, (Real)a.z, (Real)a.w))
         {
         }
 
+#ifndef __METAL_VERSION__
     //! Implicit cast from quat<double> to the current Real
-    DEVICE quat(const quat<double>& a) : s(Real(a.s)), v(a.v) { }
+    DEVICE quat(const quat<double> HOOMD_CREF a) : s(Real(a.s)), v(a.v) { }
+#endif
 
+#ifndef __METAL_VERSION__ // these are copy constructors in single precision
     //! Implicit cast from quat<float> to the current Real
-    DEVICE quat(const quat<float>& a) : s(Real(a.s)), v(a.v) { }
+    DEVICE quat(const quat<float> HOOMD_CREF a) : s(Real(a.s)), v(a.v) { }
+#endif
 
     //! Default construct a unit quaternion
     DEVICE quat() : s(1), v(vec3<Real>(0, 0, 0)) { }
 
     //! Construct a quaternion from a rotation matrix
-    DEVICE quat(const rotmat3<Real>& r);
+    DEVICE quat(const rotmat3<Real> HOOMD_CREF r);
 
     //! Construct a quat from an axis and an angle.
     /*! \param axis angle to represent
@@ -752,7 +764,7 @@ template<class Real> struct quat
        angle. The rotmat3 will initialize to the same rotation as the angle around the specified
        axis.
     */
-    DEVICE static quat fromAxisAngle(const vec3<Real>& axis, const Real& theta)
+    DEVICE static quat fromAxisAngle(const vec3<Real> HOOMD_CREF axis, const Real HOOMD_CREF theta)
         {
         quat<Real> q(fast::cos(theta / Real(2.0)), fast::sin(theta / Real(2.0)) * axis);
         return q;
@@ -769,7 +781,7 @@ template<class Real> struct quat
     Multiplication is component wise.
     \returns The quaternion (b*a.s, b*a.v).
 */
-template<class Real> DEVICE inline quat<Real> operator*(const Real& b, const quat<Real>& a)
+template<class Real> DEVICE inline quat<Real> operator*(const Real HOOMD_CREF b, const quat<Real> HOOMD_CREF a)
     {
     return quat<Real>(b * a.s, b * a.v);
     }
@@ -781,7 +793,7 @@ template<class Real> DEVICE inline quat<Real> operator*(const Real& b, const qua
     Multiplication is component wise.
     \returns The quaternion (a.s*b, a.v*b).
 */
-template<class Real> DEVICE inline quat<Real> operator*(const quat<Real>& a, const Real& b)
+template<class Real> DEVICE inline quat<Real> operator*(const quat<Real> HOOMD_CREF a, const Real HOOMD_CREF b)
     {
     return quat<Real>(a.s * b, a.v * b);
     }
@@ -793,7 +805,7 @@ template<class Real> DEVICE inline quat<Real> operator*(const quat<Real>& a, con
     Addition is component wise.
     \returns The quaternion (a.s + b.s, a.v+b.v).
 */
-template<class Real> DEVICE inline quat<Real> operator+(const quat<Real>& a, const quat<Real>& b)
+template<class Real> DEVICE inline quat<Real> operator+(const quat<Real> HOOMD_CREF a, const quat<Real> HOOMD_CREF b)
     {
     return quat<Real>(a.s + b.s, a.v + b.v);
     }
@@ -805,7 +817,7 @@ template<class Real> DEVICE inline quat<Real> operator+(const quat<Real>& a, con
     Addition is component wise.
     \returns The quaternion (a.s += b.s, a.v += b.v).
 */
-template<class Real> DEVICE inline quat<Real>& operator+=(quat<Real>& a, const quat<Real>& b)
+template<class Real> DEVICE inline quat<Real> HOOMD_THREAD& operator+=(quat<Real> HOOMD_THREAD& a, const quat<Real> HOOMD_CREF b)
     {
     a.s += b.s;
     a.v += b.v;
@@ -819,7 +831,7 @@ template<class Real> DEVICE inline quat<Real>& operator+=(quat<Real>& a, const q
     Subtraction is component wise.
     \returns The quaternion (a.s - b.s, a.v - b.v).
 */
-template<class Real> DEVICE inline quat<Real> operator-(const quat<Real>& a, const quat<Real>& b)
+template<class Real> DEVICE inline quat<Real> operator-(const quat<Real> HOOMD_CREF a, const quat<Real> HOOMD_CREF b)
     {
     return quat<Real>(a.s - b.s, a.v - b.v);
     }
@@ -831,7 +843,7 @@ template<class Real> DEVICE inline quat<Real> operator-(const quat<Real>& a, con
     Subtraction is component wise.
     \returns The quaternion (a.s -= b.s, a.v -= b.v).
 */
-template<class Real> DEVICE inline quat<Real>& operator-=(quat<Real>& a, const quat<Real>& b)
+template<class Real> DEVICE inline quat<Real> HOOMD_THREAD& operator-=(quat<Real> HOOMD_THREAD& a, const quat<Real> HOOMD_CREF b)
     {
     a.s -= b.s;
     a.v -= b.v;
@@ -850,7 +862,7 @@ template<class Real> DEVICE inline quat<Real>& operator-=(quat<Real>& a, const q
     \returns The quaternion
     (a.s * b.s − dot(a.v, b.v), a.s*b.v + b.s * a.v + cross(a.v, b.v)).
 */
-template<class Real> DEVICE inline quat<Real> operator*(const quat<Real>& a, const quat<Real>& b)
+template<class Real> DEVICE inline quat<Real> operator*(const quat<Real> HOOMD_CREF a, const quat<Real> HOOMD_CREF b)
     {
     return quat<Real>(a.s * b.s - dot(a.v, b.v), a.s * b.v + b.s * a.v + cross(a.v, b.v));
     }
@@ -863,7 +875,7 @@ template<class Real> DEVICE inline quat<Real> operator*(const quat<Real>& a, con
 
     \returns The quaternion (a.s * b.s − dot(a.v, b.v), a.s*b.v + b.s * a.v + cross(a.v, b.v)).
 */
-template<class Real> DEVICE inline quat<Real> operator*(const vec3<Real>& a, const quat<Real>& b)
+template<class Real> DEVICE inline quat<Real> operator*(const vec3<Real> HOOMD_CREF a, const quat<Real> HOOMD_CREF b)
     {
     return quat<Real>(0, a) * b;
     }
@@ -876,7 +888,7 @@ template<class Real> DEVICE inline quat<Real> operator*(const vec3<Real>& a, con
 
     \returns The quaternion (a.s * b.s − dot(a.v, b.v), a.s*b.v + b.s * a.v + cross(a.v, b.v)).
 */
-template<class Real> DEVICE inline quat<Real> operator*(const quat<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline quat<Real> operator*(const quat<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     return a * quat<Real>(0, b);
     }
@@ -886,7 +898,7 @@ template<class Real> DEVICE inline quat<Real> operator*(const quat<Real>& a, con
 
     \returns the norm of the quaternion, squared. (a.s*a.s + dot(a.v,a.v))
 */
-template<class Real> DEVICE inline Real norm2(const quat<Real>& a)
+template<class Real> DEVICE inline Real norm2(const quat<Real> HOOMD_CREF a)
     {
     return (a.s * a.s + dot(a.v, a.v));
     }
@@ -896,7 +908,7 @@ template<class Real> DEVICE inline Real norm2(const quat<Real>& a)
 
     \returns the conjugate of the quaternion. (a.s, -a.v)
 */
-template<class Real> DEVICE inline quat<Real> conj(const quat<Real>& a)
+template<class Real> DEVICE inline quat<Real> conj(const quat<Real> HOOMD_CREF a)
     {
     return quat<Real>(a.s, -a.v);
     }
@@ -905,7 +917,7 @@ template<class Real> DEVICE inline quat<Real> conj(const quat<Real>& a)
 /*! \note The rotation matrix must have positive determinant
  https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
  */
-template<class Real> DEVICE inline quat<Real>::quat(const rotmat3<Real>& r)
+template<class Real> DEVICE inline quat<Real>::quat(const rotmat3<Real> HOOMD_CREF r)
     {
     Real tr = r.row0.x + r.row1.y + r.row2.z;
 
@@ -944,7 +956,7 @@ template<class Real> DEVICE inline quat<Real>::quat(const rotmat3<Real>& r)
     \returns the vector rotated by the quaternion, equivalent to the vector component of
    a*b*conj(a);
 */
-template<class Real> DEVICE inline vec3<Real> rotate(const quat<Real>& a, const vec3<Real>& b)
+template<class Real> DEVICE inline vec3<Real> rotate(const quat<Real> HOOMD_CREF a, const vec3<Real> HOOMD_CREF b)
     {
     // quat<Real> result = a*b*conj(a);
     // return result.v;
@@ -968,7 +980,7 @@ template<class Real> DEVICE inline vec3<Real> rotate(const quat<Real>& a, const 
 
     *b* is promoted to a 3d vector with z=0 for the rotation.
 */
-template<class Real> DEVICE inline vec2<Real> rotate(const quat<Real>& a, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> rotate(const quat<Real> HOOMD_CREF a, const vec2<Real> HOOMD_CREF b)
     {
     vec3<Real> b3(b.x, b.y, Real(0.0));
     // b3 = (a*b3*conj(a)).v;
@@ -991,7 +1003,7 @@ template<class Real> DEVICE inline vec2<Real> rotate(const quat<Real>& a, const 
     \note For some unfathomable reason, hoomd stores a quaternion as (x, (y,z,w)). Be aware of this
    when using the data elsewhere.
 */
-DEVICE inline Scalar4 quat_to_scalar4(const quat<Scalar>& a)
+DEVICE inline Scalar4 quat_to_scalar4(const quat<Scalar> HOOMD_CREF a)
     {
     return make_scalar4(a.s, a.v.x, a.v.y, a.v.z);
     }
@@ -1002,7 +1014,7 @@ DEVICE inline Scalar4 quat_to_scalar4(const quat<Scalar>& a)
 
     \returns the dot product a.s*b.s+a.v.x*b.v.x + a.v.y*b.v.y + a.v.z*b.v.z.
 */
-template<class Real> DEVICE inline Real dot(const quat<Real>& a, const quat<Real>& b)
+template<class Real> DEVICE inline Real dot(const quat<Real> HOOMD_CREF a, const quat<Real> HOOMD_CREF b)
     {
     return (a.s * b.s + dot(a.v, b.v));
     }
@@ -1026,7 +1038,7 @@ template<class Real> struct rotmat2
     /*! \param _row0 First row
         \param _row1 Second row
     */
-    DEVICE rotmat2(const vec2<Real>& _row0, const vec2<Real>& _row1) : row0(_row0), row1(_row1) { }
+    DEVICE rotmat2(const vec2<Real> HOOMD_CREF _row0, const vec2<Real> HOOMD_CREF _row1) : row0(_row0), row1(_row1) { }
 
     //! Construct a rotmat2 from a quat
     /*! \param q quaternion to represent
@@ -1037,7 +1049,7 @@ template<class Real> struct rotmat2
         formula from https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 
     */
-    DEVICE explicit rotmat2(const quat<Real>& q)
+    DEVICE explicit rotmat2(const quat<Real> HOOMD_CREF q)
         {
         Real a = q.s, b = q.v.x, c = q.v.y, d = q.v.z;
 
@@ -1057,7 +1069,7 @@ template<class Real> struct rotmat2
        will initialize to the same rotation as the angle.
 
     */
-    DEVICE static rotmat2 fromAngle(const Real& theta)
+    DEVICE static rotmat2 fromAngle(const Real HOOMD_CREF theta)
         {
         vec2<Real> row0;
         vec2<Real> row1;
@@ -1079,7 +1091,7 @@ template<class Real> struct rotmat2
 
     Multiplication is matrix multiplication, where the vector is represented as a column vector.
 */
-template<class Real> DEVICE inline vec2<Real> operator*(const rotmat2<Real>& A, const vec2<Real>& b)
+template<class Real> DEVICE inline vec2<Real> operator*(const rotmat2<Real> HOOMD_CREF A, const vec2<Real> HOOMD_CREF b)
     {
     return vec2<Real>(dot(A.row0, b), dot(A.row1, b));
     }
@@ -1091,7 +1103,7 @@ template<class Real> DEVICE inline vec2<Real> operator*(const rotmat2<Real>& A, 
     A rotation matrix has an inverse equal to its transpose. There may be times where an algorithm
    needs to undo a rotation, so the transpose method is provided.
 */
-template<class Real> DEVICE inline rotmat2<Real> transpose(const rotmat2<Real>& A)
+template<class Real> DEVICE inline rotmat2<Real> transpose(const rotmat2<Real> HOOMD_CREF A)
     {
     return rotmat2<Real>(vec2<Real>(A.row0.x, A.row1.x), vec2<Real>(A.row0.y, A.row1.y));
     }
@@ -1119,7 +1131,7 @@ template<class Real> struct rotmat3
         \param _row1 Second row
         \param _row2 Third row
     */
-    DEVICE rotmat3(const vec3<Real>& _row0, const vec3<Real>& _row1, const vec3<Real>& _row2)
+    DEVICE rotmat3(const vec3<Real> HOOMD_CREF _row0, const vec3<Real> HOOMD_CREF _row1, const vec3<Real> HOOMD_CREF _row2)
         : row0(_row0), row1(_row1), row2(_row2)
         {
         }
@@ -1130,7 +1142,7 @@ template<class Real> struct rotmat3
         This is a convenience function for easy initialization of rotmat3s from quats. The rotmat3
        will initialize to the same rotation as the quaternion.
     */
-    DEVICE explicit rotmat3(const quat<Real>& q)
+    DEVICE explicit rotmat3(const quat<Real> HOOMD_CREF q)
         {
         // formula from https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
         Real a = q.s, b = q.v.x, c = q.v.y, d = q.v.z;
@@ -1162,7 +1174,7 @@ template<class Real> struct rotmat3
        angle. The rotmat3 will initialize to the same rotation as the angle around the specified
        axis.
     */
-    DEVICE static rotmat3 fromAxisAngle(const vec3<Real>& axis, const Real& theta)
+    DEVICE static rotmat3 fromAxisAngle(const vec3<Real> HOOMD_CREF axis, const Real HOOMD_CREF theta)
         {
         return rotmat3<Real>(quat<Real>::fromAxisAngle(axis, theta));
         }
@@ -1188,8 +1200,8 @@ template<class Real> struct rotmat3
     Multiplication is matrix multiplication, where the vector is represented as a column vector.
 */
 template<class Real>
-DEVICE inline __attribute__((always_inline)) vec3<Real> operator*(const rotmat3<Real>& A,
-                                                                  const vec3<Real>& b)
+DEVICE inline __attribute__((always_inline)) vec3<Real> operator*(const rotmat3<Real> HOOMD_CREF A,
+                                                                  const vec3<Real> HOOMD_CREF b)
     {
     return vec3<Real>(dot(A.row0, b), dot(A.row1, b), dot(A.row2, b));
     }
@@ -1200,7 +1212,7 @@ DEVICE inline __attribute__((always_inline)) vec3<Real> operator*(const rotmat3<
     \returns A*b
 */
 template<class Real>
-DEVICE inline rotmat3<Real> operator*(const rotmat3<Real>& A, const rotmat3<Real>& B)
+DEVICE inline rotmat3<Real> operator*(const rotmat3<Real> HOOMD_CREF A, const rotmat3<Real> HOOMD_CREF B)
     {
     rotmat3<Real> r;
     rotmat3<Real> B_t = transpose(B);
@@ -1223,7 +1235,7 @@ DEVICE inline rotmat3<Real> operator*(const rotmat3<Real>& A, const rotmat3<Real
     A rotation matrix has an inverse equal to its transpose. There may be times where an algorithm
    needs to undo a rotation, so the transpose method is provided.
 */
-template<class Real> DEVICE inline rotmat3<Real> transpose(const rotmat3<Real>& A)
+template<class Real> DEVICE inline rotmat3<Real> transpose(const rotmat3<Real> HOOMD_CREF A)
     {
     return rotmat3<Real>(vec3<Real>(A.row0.x, A.row1.x, A.row2.x),
                          vec3<Real>(A.row0.y, A.row1.y, A.row2.y),
@@ -1238,7 +1250,7 @@ template<class Real> DEVICE inline rotmat3<Real> transpose(const rotmat3<Real>& 
     \returns the projection of a onto b
     \note projection() can be applied to 2d or 3d vectors
 */
-template<class Vec> DEVICE inline Vec project(const Vec& a, const Vec& b)
+template<class Vec> DEVICE inline Vec project(const Vec HOOMD_CREF a, const Vec HOOMD_CREF b)
     {
     return dot(a, b) / dot(b, b) * b;
     }

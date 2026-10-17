@@ -5,7 +5,9 @@
     \brief Defines the helper functions (GPU version) for updating the GPU bonded group tables
  */
 
+#ifndef __METAL_VERSION__
 #include "CachedAllocator.h"
+#endif
 #include "HOOMDMath.h"
 
 #ifndef __BONDED_GROUP_DATA_CUH__
@@ -15,7 +17,7 @@ namespace hoomd
     {
 #ifdef __HIPCC__
 //! Sentinel value
-const unsigned int GROUP_NOT_LOCAL = 0xffffffff;
+HOOMD_CONSTANT const unsigned int GROUP_NOT_LOCAL = 0xffffffff;
 
     //! Storage for group members (GPU declaration)
     template<unsigned int group_size> union group_storage {
@@ -49,6 +51,7 @@ template<unsigned int group_size> struct packed_storage;
 union typeval_union;
 #endif
 
+#ifndef __METAL_VERSION__
 template<unsigned int group_size, typename group_t>
 void gpu_update_group_table(const unsigned int n_groups,
                             const unsigned int N,
@@ -68,6 +71,7 @@ void gpu_update_group_table(const unsigned int n_groups,
                             unsigned int* d_offsets,
                             bool has_type_mapping,
                             CachedAllocator& alloc);
+#endif
 
     } // end namespace hoomd
 #endif // __BONDED_GROUP_DATA_CUH__

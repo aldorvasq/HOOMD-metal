@@ -51,6 +51,7 @@ set(_mpcd_headers
     )
 
 set(_mpcd_cu_sources "")
+set(_mpcd_metal_sources "")
 
 set(_forces
     BlockForce
@@ -160,6 +161,7 @@ foreach(_force ${_forces})
             BulkStreamingMethod${_force}GPU.cu
             @ONLY
         )
+        hoomd_metal_configure_kernel(BulkStreamingMethodGPU BulkStreamingMethod${_force}GPU _mpcd_metal_sources)
         list(APPEND _mpcd_cc_sources BulkStreamingMethod${_force}GPU.cc)
         list(APPEND _mpcd_cu_sources BulkStreamingMethod${_force}GPU.cu)
     endif()
@@ -183,6 +185,7 @@ foreach(_force ${_forces})
                 BounceBackStreamingMethod${_geometry}${_force}GPU.cu
                 @ONLY
             )
+            hoomd_metal_configure_kernel(BounceBackStreamingMethodGPU BounceBackStreamingMethod${_geometry}${_force}GPU _mpcd_metal_sources)
             list(APPEND _mpcd_cc_sources BounceBackStreamingMethod${_geometry}${_force}GPU.cc)
             list(APPEND _mpcd_cu_sources BounceBackStreamingMethod${_geometry}${_force}GPU.cu)
         endif()
@@ -208,6 +211,7 @@ foreach(_geometry ${_geometries})
             BounceBackNVE${_geometry}GPU.cu
             @ONLY
         )
+        hoomd_metal_configure_kernel(BounceBackNVEGPU BounceBackNVE${_geometry}GPU _mpcd_metal_sources)
         list(APPEND _mpcd_cc_sources BounceBackNVE${_geometry}GPU.cc)
         list(APPEND _mpcd_cu_sources BounceBackNVE${_geometry}GPU.cu)
     endif()
@@ -237,6 +241,7 @@ foreach(_geometry ${_geometries})
             RejectionVirtualParticleFiller${_geometry}GPUDrawKernel.cu
             @ONLY
         )
+        hoomd_metal_configure_kernel(RejectionVirtualParticleFillerGPUDrawKernel RejectionVirtualParticleFiller${_geometry}GPUDrawKernel _mpcd_metal_sources)
         list(APPEND _mpcd_cc_sources RejectionVirtualParticleFiller${_geometry}GPU.cc)
         list(APPEND _mpcd_cu_sources RejectionVirtualParticleFiller${_geometry}GPUDrawKernel.cu)
     endif()
@@ -244,7 +249,13 @@ endforeach()
 
 if(ENABLE_HIP)
     set_source_files_properties(${_mpcd_cu_sources} PROPERTIES LANGUAGE ${HOOMD_DEVICE_LANGUAGE})
+    hoomd_metal_ported_sources(_mpcd_metal_sources ${_mpcd_cu_sources})
 endif (ENABLE_HIP)
+
+if (ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
+    # Metal kernels replace the .cu files
+    set(_mpcd_cu_sources "")
+endif()
 
 hoomd_add_module(_mpcd SHARED ${_mpcd_cc_sources} ${_mpcd_cu_sources} ${_mpcd_headers} NO_EXTRAS)
 # alias into the HOOMD namespace so that plugins and symlinked components both work
@@ -258,6 +269,10 @@ endif()
 
 # link the library to its dependencies
 target_link_libraries(_mpcd PUBLIC _hoomd _md)
+if (ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
+    hoomd_add_metal_sources(_mpcd ${_mpcd_metal_sources})
+    hoomd_metal_unported_stubs(_mpcd _hoomd _md)
+endif()
 
 # install the library
 install(TARGETS _mpcd EXPORT HOOMDTargets LIBRARY DESTINATION ${PYTHON_SITE_INSTALL_DIR}/mpcd)

@@ -208,10 +208,19 @@ if (BUILD_MPCD)
     # headers will be installed by MPCD itself so they go in the right subdirectory
 endif()
 
-if (ENABLE_HIP)
+if (ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
+# Metal kernels are in .metal files next to the .cu files they replace
+string(REPLACE ".cu" ".metal" _hoomd_metal_sources "${_hoomd_cu_sources}")
+# these kernels are only used for domain decomposition
+list(REMOVE_ITEM _hoomd_metal_sources CommunicatorGPU.metal LoadBalancerGPU.metal ParticleData.metal
+                                      mpcd/ParticleData.metal)
+list(APPEND _hoomd_metal_sources mtl/Primitives.metal mtl/HipFFT.metal)
+list(APPEND _hoomd_sources mtl/HipMetalRuntime.mm)
+set_source_files_properties(mtl/HipMetalRuntime.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+elseif (ENABLE_HIP)
 set(_cuda_sources ${_hoomd_cu_sources})
 set_source_files_properties(${_hoomd_cu_sources} PROPERTIES LANGUAGE ${HOOMD_DEVICE_LANGUAGE})
-endif (ENABLE_HIP)
+endif (ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
 
 #########################
 ## Build the module
@@ -277,6 +286,11 @@ if (ENABLE_HIP)
     endif()
 
     target_link_libraries(_hoomd PUBLIC hip::host)
+
+    if (HIP_PLATFORM STREQUAL "metal")
+        hoomd_add_metal_sources(_hoomd ${_hoomd_metal_sources})
+        target_link_libraries(_hoomd PUBLIC ${METAL_FRAMEWORK} ${FOUNDATION_FRAMEWORK} ${IOKIT_FRAMEWORK})
+    endif()
 
     if (ENABLE_ROCTRACER)
         target_link_libraries(_hoomd PUBLIC HIP::roctracer)

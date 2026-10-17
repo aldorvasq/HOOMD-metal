@@ -56,9 +56,9 @@ class EvaluatorPairDipole
             \param available_bytes Size of remaining shared memory
             allocation
         */
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
         HOSTDEVICE param_type() : A(0), kappa(0) { }
 
@@ -94,9 +94,9 @@ class EvaluatorPairDipole
         /*! \param ptr Pointer to load data to (will be incremented)
             \param available_bytes Size of remaining shared memory allocation
         */
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
         HOSTDEVICE shape_type() : mu {0, 0, 0} { }
 
@@ -131,11 +131,11 @@ class EvaluatorPairDipole
         \param _kappa Inverse screening length
         \param _params Per type pair parameters of this potential
     */
-    HOSTDEVICE EvaluatorPairDipole(Scalar3& _dr,
-                                   Scalar4& _quat_i,
-                                   Scalar4& _quat_j,
+    HOSTDEVICE EvaluatorPairDipole(Scalar3 HOOMD_THREAD& _dr,
+                                   Scalar4 HOOMD_THREAD& _quat_i,
+                                   Scalar4 HOOMD_THREAD& _quat_j,
                                    Scalar _rcutsq,
-                                   const param_type& _params)
+                                   const param_type HOOMD_CREF _params)
         : dr(_dr), rcutsq(_rcutsq), q_i(0), q_j(0), quat_i(_quat_i), quat_j(_quat_j),
           mu_i {0, 0, 0}, mu_j {0, 0, 0}, A(_params.A), kappa(_params.kappa)
         {
@@ -169,7 +169,7 @@ class EvaluatorPairDipole
     /*! \param shape_i Shape of particle i
         \param shape_j Shape of particle j
     */
-    HOSTDEVICE void setShape(const shape_type* shapei, const shape_type* shapej)
+    HOSTDEVICE void setShape(const shape_type HOOMD_THREAD* shapei, const shape_type HOOMD_THREAD* shapej)
         {
         mu_i = shapei->mu;
         mu_j = shapej->mu;
@@ -201,11 +201,11 @@ class EvaluatorPairDipole
         \return True if they are evaluated or false if they are not because
             we are beyond the cutoff.
     */
-    HOSTDEVICE bool evaluate(Scalar3& force,
-                             Scalar& pair_eng,
+    HOSTDEVICE bool evaluate(Scalar3 HOOMD_THREAD& force,
+                             Scalar HOOMD_THREAD& pair_eng,
                              bool energy_shift,
-                             Scalar3& torque_i,
-                             Scalar3& torque_j)
+                             Scalar3 HOOMD_THREAD& torque_i,
+                             Scalar3 HOOMD_THREAD& torque_j)
         {
         vec3<Scalar> rvec(dr);
         Scalar rsq = dot(rvec, rvec);

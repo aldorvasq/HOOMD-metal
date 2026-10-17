@@ -75,7 +75,7 @@ class EvaluatorExternalMagneticField
 #endif // ifndef __HIPCC__
         } __attribute__((aligned(16)));
 
-    typedef void* field_type;
+    typedef HOOMD_GLOBAL void* field_type;
 
     //! Constructs the external field evaluator
     /*! \param X position of particle
@@ -84,9 +84,9 @@ class EvaluatorExternalMagneticField
     */
     DEVICE EvaluatorExternalMagneticField(Scalar3 X,
                                           quat<Scalar> q,
-                                          const BoxDim& box,
-                                          const param_type& params,
-                                          const field_type& field)
+                                          const BoxDim HOOMD_CREF box,
+                                          const param_type HOOMD_CREF params,
+                                          const field_type HOOMD_CREF field)
         : m_q(q), m_B(params.B), m_mu(params.mu)
         {
         }
@@ -117,7 +117,7 @@ class EvaluatorExternalMagneticField
         \param virial array of six scalars for the upper triangular virial tensor
     */
     DEVICE void
-    evalForceTorqueEnergyAndVirial(Scalar3& F, Scalar3& T, Scalar& energy, Scalar* virial)
+    evalForceTorqueEnergyAndVirial(Scalar3 HOOMD_THREAD& F, Scalar3 HOOMD_THREAD& T, Scalar HOOMD_THREAD& energy, Scalar HOOMD_THREAD* virial)
         {
         vec3<Scalar> dir = rotate(m_q, m_mu);
 

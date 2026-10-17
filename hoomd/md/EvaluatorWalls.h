@@ -28,9 +28,9 @@
 #endif
 
 // sets the max numbers for each wall geometry type
-const unsigned int MAX_N_SWALLS = 20;
-const unsigned int MAX_N_CWALLS = 20;
-const unsigned int MAX_N_PWALLS = 60;
+HOOMD_CONSTANT const unsigned int MAX_N_SWALLS = 20;
+HOOMD_CONSTANT const unsigned int MAX_N_CWALLS = 20;
+HOOMD_CONSTANT const unsigned int MAX_N_PWALLS = 60;
 
 namespace hoomd
     {
@@ -47,6 +47,7 @@ struct HOOMD_PYBIND11_EXPORT wall_type
 
     wall_type() : numSpheres(0), numCylinders(0), numPlanes(0) { }
 
+#ifndef __HIPCC__
     // The following methods are to test the ArrayView<> templated class.
 
     unsigned int getNumSpheres()
@@ -78,10 +79,11 @@ struct HOOMD_PYBIND11_EXPORT wall_type
         {
         return Planes[index];
         }
+#endif
     };
 
 /// Function for getting the force direction for particle on the wall with r_extrap
-DEVICE inline Scalar3 onWallForceDirection(const vec3<Scalar>& position, const SphereWall& wall)
+DEVICE inline Scalar3 onWallForceDirection(const vec3<Scalar> HOOMD_CREF position, const SphereWall HOOMD_CREF wall)
     {
     // We need a direction for the force and since r == 0 then the distance from
     // the origin is the Sphere's radius.
@@ -89,7 +91,7 @@ DEVICE inline Scalar3 onWallForceDirection(const vec3<Scalar>& position, const S
     }
 
 /// Function for getting the force direction for particle on the wall with r_extrap
-DEVICE inline Scalar3 onWallForceDirection(const vec3<Scalar>& position, const CylinderWall& wall)
+DEVICE inline Scalar3 onWallForceDirection(const vec3<Scalar> HOOMD_CREF position, const CylinderWall HOOMD_CREF wall)
     {
     auto s = rotate(wall.quatAxisToZRot, wall.origin - position);
     s.z = 0.0;
@@ -97,7 +99,7 @@ DEVICE inline Scalar3 onWallForceDirection(const vec3<Scalar>& position, const C
     }
 
 /// Function for getting the force direction for particle on the wall with r_extrap
-DEVICE inline Scalar3 onWallForceDirection(const PlaneWall& wall)
+DEVICE inline Scalar3 onWallForceDirection(const PlaneWall HOOMD_CREF wall)
     {
     return vec_to_scalar3(-wall.normal);
     }
@@ -136,9 +138,9 @@ template<class evaluator> class EvaluatorWalls
     //! Constructs the external wall potential evaluator
     DEVICE EvaluatorWalls(Scalar3 pos,
                           quat<Scalar> q,
-                          const BoxDim& box,
-                          const param_type& p,
-                          const field_type& f)
+                          const BoxDim HOOMD_CREF box,
+                          const param_type HOOMD_CREF p,
+                          const field_type HOOMD_SHARED_REF f)
         : m_pos(pos), m_field(f), m_params(p)
         {
         }
@@ -165,7 +167,7 @@ template<class evaluator> class EvaluatorWalls
         qi = charge;
         }
 
-    DEVICE inline void callEvaluator(Scalar3& F, Scalar& energy, const Scalar3 drv)
+    DEVICE inline void callEvaluator(Scalar3 HOOMD_THREAD& F, Scalar HOOMD_THREAD& energy, const Scalar3 drv)
         {
         Scalar rsq = dot(drv, drv);
 
@@ -197,8 +199,8 @@ template<class evaluator> class EvaluatorWalls
             }
         }
 
-    DEVICE inline void extrapEvaluator(Scalar3& F,
-                                       Scalar& energy,
+    DEVICE inline void extrapEvaluator(Scalar3 HOOMD_THREAD& F,
+                                       Scalar HOOMD_THREAD& energy,
                                        const Scalar3 drv,
                                        const Scalar rextrapsq,
                                        const Scalar r)
@@ -234,7 +236,7 @@ template<class evaluator> class EvaluatorWalls
 
     //! Generates force and energy from standard evaluators using wall geometry functions
     DEVICE void
-    evalForceTorqueEnergyAndVirial(Scalar3& F, Scalar3& T, Scalar& energy, Scalar* virial)
+    evalForceTorqueEnergyAndVirial(Scalar3 HOOMD_THREAD& F, Scalar3 HOOMD_THREAD& T, Scalar HOOMD_THREAD& energy, Scalar HOOMD_THREAD* virial)
         {
         F.x = Scalar(0.0);
         F.y = Scalar(0.0);
@@ -386,7 +388,7 @@ template<class evaluator> class EvaluatorWalls
 
     protected:
     Scalar3 m_pos;             //!< particle position
-    const field_type& m_field; //!< contains all information about the walls.
+    const field_type HOOMD_SHARED_REF m_field; //!< contains all information about the walls.
     param_type m_params;
     Scalar qi;
     };

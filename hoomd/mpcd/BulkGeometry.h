@@ -46,7 +46,7 @@ class __attribute__((visibility("default"))) BulkGeometry
      * is updated according to the appropriate bounce back rule, and the integration time \a dt is
      * decreased to the amount of time remaining.
      */
-    HOSTDEVICE bool detectCollision(Scalar3& pos, Scalar3& vel, Scalar& dt) const
+    HOSTDEVICE bool detectCollision(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, Scalar HOOMD_THREAD& dt) const
         {
         dt = Scalar(0);
         return false;
@@ -57,7 +57,7 @@ class __attribute__((visibility("default"))) BulkGeometry
      * \param pos Current particle position
      * \returns True because particles are always in bounds in the bulk geometry.
      */
-    HOSTDEVICE bool isOutside(const Scalar3& pos) const
+    HOSTDEVICE bool isOutside(const Scalar3 HOOMD_CREF pos) const
         {
         return false;
         }

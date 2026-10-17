@@ -100,7 +100,21 @@ set(HOOMD_LONGREAL_SIZE "64" CACHE STRING "Size of the LongReal type in bits.")
 SET_PROPERTY(CACHE HOOMD_LONGREAL_SIZE PROPERTY STRINGS "32" "64")
 OPTION(ENABLE_GPU "True if we are compiling for a GPU target" FALSE)
 SET(ENABLE_HIP ${ENABLE_GPU})
-set(HOOMD_GPU_PLATFORM "CUDA" CACHE STRING "Choose the GPU backend: HIP or CUDA.")
+set(HOOMD_GPU_PLATFORM "CUDA" CACHE STRING "Choose the GPU backend: HIP, CUDA, or Metal.")
+SET_PROPERTY(CACHE HOOMD_GPU_PLATFORM PROPERTY STRINGS "CUDA" "HIP" "Metal")
+
+if (ENABLE_GPU AND HOOMD_GPU_PLATFORM STREQUAL "Metal")
+    if (NOT APPLE)
+        message(FATAL_ERROR "HOOMD_GPU_PLATFORM=Metal requires macOS.")
+    endif()
+    # Apple GPUs have no double precision arithmetic
+    if (NOT HOOMD_LONGREAL_SIZE STREQUAL "32" OR NOT HOOMD_SHORTREAL_SIZE STREQUAL "32")
+        message(WARNING "Apple GPUs do not support double precision. "
+                        "Setting HOOMD_LONGREAL_SIZE=32 and HOOMD_SHORTREAL_SIZE=32.")
+        set(HOOMD_LONGREAL_SIZE "32" CACHE STRING "Size of the LongReal type in bits." FORCE)
+        set(HOOMD_SHORTREAL_SIZE "32" CACHE STRING "Size of the ShortReal type in bits." FORCE)
+    endif()
+endif()
 
 # Components
 option(BUILD_MD "Build the md package" on)
@@ -131,6 +145,9 @@ include (HOOMDCUDASetup)
 include (HOOMDMPISetup)
 # find the python libraries to link to
 include(HOOMDPythonSetup)
+
+# setup Metal kernel compilation (requires Python)
+include (HOOMDMetalSetup)
 
 include (hoomd-macros)
 

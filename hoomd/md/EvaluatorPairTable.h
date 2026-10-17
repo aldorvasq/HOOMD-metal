@@ -52,13 +52,13 @@ class EvaluatorPairTable
         /*! \param ptr Pointer to load data to (will be incremented)
             \param available_bytes Size of remaining shared memory allocation
          */
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes)
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes)
             {
             V_table.load_shared(ptr, available_bytes);
             F_table.load_shared(ptr, available_bytes);
             }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const
             {
             V_table.allocate_shared(ptr, available_bytes);
             F_table.allocate_shared(ptr, available_bytes);
@@ -122,7 +122,7 @@ class EvaluatorPairTable
         \param _rcutsq Squared distance at which the potential goes to 0
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorPairTable(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorPairTable(Scalar _rsq, Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), rcutsq(_rcutsq), rmin(_params.rmin), V_table(_params.V_table),
           F_table(_params.F_table)
         {
@@ -149,7 +149,7 @@ class EvaluatorPairTable
         range.
     */
     DEVICE bool
-    evalForceAndEnergy(Scalar& force_divr, Scalar& pair_eng, const bool energy_shift) const
+    evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& pair_eng, const bool energy_shift) const
         {
         unsigned int width = V_table.size();
 
@@ -223,8 +223,8 @@ class EvaluatorPairTable
     Scalar rcutsq;                       //!< the potential cuttoff distance squared
     size_t width;                        //!< the distance between table indices
     Scalar rmin;                         //!< the distance of the first index of the table potential
-    const ManagedArray<Scalar>& V_table; //!< the tabulated energy
-    const ManagedArray<Scalar>& F_table; //!< the tabulated force specifically - (dV / dr)
+    const ManagedArray<Scalar> HOOMD_CREF V_table; //!< the tabulated energy
+    const ManagedArray<Scalar> HOOMD_CREF F_table; //!< the tabulated force specifically - (dV / dr)
     };
 
     } // end namespace md

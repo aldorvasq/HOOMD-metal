@@ -1,0 +1,39 @@
+// Copyright (c) 2009-2026 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
+
+// Stand-in for a C/C++ standard library header when preprocessing Metal Shading Language.
+#pragma once
+
+// CUDA allows std:: math functions in device code
+namespace std
+    {
+using metal::abs;
+using metal::acos;
+using metal::asin;
+using metal::atan;
+using metal::atan2;
+using metal::ceil;
+using metal::copysign;
+using metal::cos;
+using metal::exp;
+using metal::fabs;
+using metal::floor;
+using metal::fmax;
+using metal::fmin;
+using metal::fmod;
+using metal::isfinite;
+using metal::isinf;
+using metal::isnan;
+using metal::log;
+using metal::max;
+using metal::min;
+using metal::pow;
+using metal::rint;
+using metal::round;
+using metal::signbit;
+using metal::sin;
+using metal::sqrt;
+using metal::tan;
+using metal::tanh;
+using metal::trunc;
+    }

@@ -10,6 +10,8 @@
 #include "hoomd/HOOMDMath.h"
 #include "hoomd/Index1D.h"
 
+#include <cuda_runtime.h>
+
 namespace hoomd
     {
 namespace mpcd

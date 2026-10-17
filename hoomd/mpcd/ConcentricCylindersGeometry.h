@@ -52,7 +52,7 @@ class __attribute__((visibility("default"))) ConcentricCylindersGeometry
      * is updated according to the appropriate bounce back rule, and the integration time \a dt is
      * decreased to the amount of time remaining.
      */
-    HOSTDEVICE bool detectCollision(Scalar3& pos, Scalar3& vel, Scalar& dt) const
+    HOSTDEVICE bool detectCollision(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, Scalar HOOMD_THREAD& dt) const
         {
         const Scalar rsq = pos.x * pos.x + pos.y * pos.y;
         /*
@@ -115,7 +115,7 @@ class __attribute__((visibility("default"))) ConcentricCylindersGeometry
      * \param pos Current particle position
      * \returns True if particle is out of bounds, and false otherwise
      */
-    HOSTDEVICE bool isOutside(const Scalar3& pos) const
+    HOSTDEVICE bool isOutside(const Scalar3 HOOMD_CREF pos) const
         {
         const Scalar rsq = pos.x * pos.x + pos.y * pos.y;
         return (rsq > m_R1_sq || rsq < m_R0_sq);
@@ -128,7 +128,7 @@ class __attribute__((visibility("default"))) ConcentricCylindersGeometry
      *
      * Add velocity of rotating outer cylinder to \a vel for particles beyond the outer radius.
      */
-    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3& vel, const Scalar3& pos) const
+    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3 HOOMD_THREAD& vel, const Scalar3 HOOMD_CREF pos) const
         {
         const Scalar rsq = pos.x * pos.x + pos.y * pos.y;
         if (rsq > m_R1_sq)

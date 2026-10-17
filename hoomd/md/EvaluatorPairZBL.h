@@ -51,9 +51,9 @@ class EvaluatorPairZBL
     //! Define the parameter type used by this pair potential evaluator
     typedef EvaluatorPairMoliere::param_type param_type;
 
-    DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+    DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-    HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+    HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
 #ifdef ENABLE_HIP
     // set CUDA memory hints
@@ -68,7 +68,7 @@ class EvaluatorPairZBL
         \param _rcutsq Squared distance at which the potential goes to zero.
         \param _params Per type-pair parameters of this potential
     */
-    DEVICE EvaluatorPairZBL(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorPairZBL(Scalar _rsq, Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), rcutsq(_rcutsq), Zsq(_params.qi * _params.qj), aF(_params.aF)
         {
         }
@@ -92,7 +92,7 @@ class EvaluatorPairZBL
 
         \return True if they are evaluated or false if they are not because we are beyond the cutoff
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& pair_eng, bool energy_shift)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& pair_eng, bool energy_shift)
         {
         // compute the force divided by r in force_divr
         if (rsq < rcutsq && Zsq != 0 && aF != 0)

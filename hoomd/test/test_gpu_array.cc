@@ -92,6 +92,10 @@ UP_TEST(GPUArray_basic_tests)
     }
 
 #ifdef ENABLE_HIP
+// Apple GPUs share memory with the CPU, so the host and device always see the same data and the
+// copy avoidance this test checks for discrete GPUs (overwrite and read access modes) does not
+// apply.
+#ifndef __HIP_PLATFORM_METAL__
 //! test case for testing device to/from host transfers
 UP_TEST(GPUArray_transfer_tests)
     {
@@ -208,6 +212,8 @@ UP_TEST(GPUArray_transfer_tests)
     }
 
 //! Tests operations on NULL GPUArrays
+#endif
+
 UP_TEST(GPUArray_null_tests)
     {
     // Construct a NULL GPUArray

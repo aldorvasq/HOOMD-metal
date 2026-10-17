@@ -46,7 +46,7 @@ class __attribute__((visibility("default"))) ConstantForce
      * Since the force is constant, just the constant value is returned.
      * More complicated functional forms will need to operate on \a r.
      */
-    HOSTDEVICE INLINE Scalar3 evaluate(const Scalar3& r) const
+    HOSTDEVICE INLINE Scalar3 evaluate(const Scalar3 HOOMD_CREF r) const
         {
         return m_F;
         }
@@ -56,7 +56,7 @@ class __attribute__((visibility("default"))) ConstantForce
         return m_F;
         }
 
-    HOSTDEVICE void setForce(const Scalar3& F)
+    HOSTDEVICE void setForce(const Scalar3 HOOMD_CREF F)
         {
         m_F = F;
         }

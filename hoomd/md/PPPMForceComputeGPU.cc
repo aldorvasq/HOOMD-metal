@@ -48,7 +48,7 @@ PPPMForceComputeGPU::~PPPMForceComputeGPU()
     {
     if (m_local_fft && m_cufft_initialized)
         {
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
         CHECK_HIPFFT_ERROR(hipfftDestroy(m_hipfft_plan));
 #else
         CHECK_HIPFFT_ERROR(cufftDestroy(m_hipfft_plan));
@@ -68,7 +68,7 @@ void PPPMForceComputeGPU::initializeFFT()
     // free plans if they have already been initialized
     if (m_local_fft && m_cufft_initialized)
         {
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
         CHECK_HIPFFT_ERROR(hipfftDestroy(m_hipfft_plan));
 #else
         CHECK_HIPFFT_ERROR(cufftDestroy(m_hipfft_plan));
@@ -188,7 +188,7 @@ void PPPMForceComputeGPU::initializeFFT()
     if (m_local_fft)
         {
 // create plan on every device
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
         CHECK_HIPFFT_ERROR(hipfftPlan3d(&m_hipfft_plan,
                                         m_mesh_points.z,
                                         m_mesh_points.y,
@@ -287,7 +287,7 @@ void PPPMForceComputeGPU::updateMeshes()
         // locally transform the particle mesh
         ArrayHandle<hipfftComplex> d_mesh(m_mesh, access_location::device, access_mode::read);
 
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
         CHECK_HIPFFT_ERROR(hipfftExecC2C(m_hipfft_plan, d_mesh.data, d_mesh.data, HIPFFT_FORWARD));
 #else
         CHECK_HIPFFT_ERROR(cufftExecC2C(m_hipfft_plan, d_mesh.data, d_mesh.data, CUFFT_FORWARD));
@@ -374,7 +374,7 @@ void PPPMForceComputeGPU::updateMeshes()
 
         m_exec_conf->setDevice();
 
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
         CHECK_HIPFFT_ERROR(hipfftExecC2C(m_hipfft_plan,
                                          d_inv_fourier_mesh_x.data,
                                          d_inv_fourier_mesh_x.data,

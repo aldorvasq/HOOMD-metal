@@ -78,7 +78,7 @@ class EvaluatorBondHarmonic
     /*! \param _rsq Squared distance between the particles
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorBondHarmonic(Scalar _rsq, const param_type& _params)
+    DEVICE EvaluatorBondHarmonic(Scalar _rsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), K(_params.k), r_0(_params.r_0)
         {
         }
@@ -102,7 +102,7 @@ class EvaluatorBondHarmonic
         \return True if they are evaluated or false if the bond
                 energy is not defined
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& bond_eng)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& bond_eng)
         {
         Scalar r = sqrt(rsq);
         force_divr = K * (r_0 / r - Scalar(1.0));

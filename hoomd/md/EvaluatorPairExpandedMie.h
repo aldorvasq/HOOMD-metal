@@ -43,9 +43,9 @@ class EvaluatorPairExpandedMie
         Scalar sigma;
         Scalar epsilon;
 
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
 #ifdef ENABLE_HIP
         //! set CUDA memory hints
@@ -98,7 +98,7 @@ class EvaluatorPairExpandedMie
         \param _delta Horizontal shift in r
     */
     DEVICE
-    EvaluatorPairExpandedMie(const Scalar _rsq, const Scalar _rcutsq, const param_type& _params)
+    EvaluatorPairExpandedMie(const Scalar _rsq, const Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), rcutsq(_rcutsq), repulsive(_params.repulsive), attractive(_params.attractive),
           n_pow(_params.n_pow), m_pow(_params.m_pow), delta(_params.delta)
         {
@@ -124,7 +124,7 @@ class EvaluatorPairExpandedMie
 
         \return True if they are evaluated or false if they are not because we are beyond the cutoff
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& pair_eng, bool energy_shift) const
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& pair_eng, bool energy_shift) const
         {
         // precompute some quantities
         Scalar rinv = fast::rsqrt(rsq);

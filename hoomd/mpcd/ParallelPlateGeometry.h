@@ -75,7 +75,7 @@ class __attribute__((visibility("default"))) ParallelPlateGeometry
      * is updated according to the appropriate bounce back rule, and the integration time \a dt is
      * decreased to the amount of time remaining.
      */
-    HOSTDEVICE bool detectCollision(Scalar3& pos, Scalar3& vel, Scalar& dt) const
+    HOSTDEVICE bool detectCollision(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, Scalar HOOMD_THREAD& dt) const
         {
         /*
          * Detect if particle has left the box, and try to avoid branching or absolute value calls.
@@ -129,7 +129,7 @@ class __attribute__((visibility("default"))) ParallelPlateGeometry
      * \param pos Current particle position
      * \returns True if particle is out of bounds, and false otherwise
      */
-    HOSTDEVICE bool isOutside(const Scalar3& pos) const
+    HOSTDEVICE bool isOutside(const Scalar3 HOOMD_CREF pos) const
         {
         return (pos.y > m_H || pos.y < -m_H);
         }
@@ -143,7 +143,7 @@ class __attribute__((visibility("default"))) ParallelPlateGeometry
      * distance. The velocity is increased by \a m_V if beyond the upper plate, and decreased by \a
      * m_V if beyond the lower plate.
      */
-    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3& vel, const Scalar3& pos) const
+    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3 HOOMD_THREAD& vel, const Scalar3 HOOMD_CREF pos) const
         {
         if (pos.y > m_H)
             {

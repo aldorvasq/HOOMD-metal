@@ -8,7 +8,7 @@
 
 #ifdef ENABLE_HIP
 
-#if __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
 #include <hipfft.h>
 #elif __HIP_PLATFORM_NVCC__
 #include <cufft.h>
@@ -78,13 +78,13 @@ class PYBIND11_EXPORT PPPMForceComputeGPU : public PPPMForceCompute
     virtual void fixExclusions();
 
 //! Check for HIPFFT errors
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
     inline void handleHIPFFTResult(hipfftResult result, const char* file, unsigned int line) const
 #else
     inline void handleHIPFFTResult(cufftResult result, const char* file, unsigned int line) const
 #endif
         {
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
         if (result != HIPFFT_SUCCESS)
 #else
         if (result != CUFFT_SUCCESS)

@@ -57,7 +57,7 @@ class __attribute__((visibility("default"))) SineForce
      * routines are used since this is probably sufficiently accurate,
      * given the other numerical errors already present.
      */
-    HOSTDEVICE Scalar3 evaluate(const Scalar3& r) const
+    HOSTDEVICE Scalar3 evaluate(const Scalar3 HOOMD_CREF r) const
         {
         return make_scalar3(m_F * fast::sin(m_k * r.y), 0, 0);
         }

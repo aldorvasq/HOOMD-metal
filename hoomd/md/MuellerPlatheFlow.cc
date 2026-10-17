@@ -302,7 +302,7 @@ void MuellerPlatheFlow::searchMinMaxVelocity(void)
                 if (index == this->getMinSlab() && m_last_min_vel.x > vel && this->hasMinSlab())
                     {
                     m_last_min_vel.x = vel;
-                    m_last_max_vel.y = mass;
+                    m_last_min_vel.y = mass;
                     m_last_min_vel.z = __int_as_scalar(h_tag.data[j]);
                     }
                 }

@@ -8,7 +8,7 @@
 #include "hip/hip_runtime.h"
 
 #if defined(ENABLE_HIP)
-#ifdef __HIP_PLATFORM_HCC__
+#if defined(__HIP_PLATFORM_HCC__) || defined(__HIP_PLATFORM_METAL__)
 #include <hipfft.h>
 #else
 #include <cufft.h>

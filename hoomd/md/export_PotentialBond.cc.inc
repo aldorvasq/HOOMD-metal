@@ -16,6 +16,10 @@ namespace hoomd
     {
 namespace md
     {
+// Explicitly instantiate the destructor here: the GPU export declares the class extern and some
+// compilers do not emit it through implicit instantiation.
+template PotentialBond<EVALUATOR_CLASS, BondData>::~PotentialBond();
+
 namespace detail
     {
 

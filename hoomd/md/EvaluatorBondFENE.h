@@ -87,7 +87,7 @@ class EvaluatorBondFENE
     /*! \param _rsq Squared distance between the particles
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorBondFENE(Scalar _rsq, const param_type& _params)
+    DEVICE EvaluatorBondFENE(Scalar _rsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), K(_params.k), r_0(_params.r_0),
           lj1(_params.epsilon_x_4 * _params.sigma_6 * _params.sigma_6),
           lj2(_params.epsilon_x_4 * _params.sigma_6), delta(_params.delta)
@@ -113,7 +113,7 @@ class EvaluatorBondFENE
         \return True if they are evaluated or false if the bond
                 energy is not defined
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& bond_eng)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& bond_eng)
         {
         Scalar rmdoverr = Scalar(1.0);
 

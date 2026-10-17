@@ -77,7 +77,7 @@ class EvaluatorRevCross
     */
     DEVICE EvaluatorRevCross(Scalar _rij_sq,
                              Scalar _rcutsq,
-                             const param_type& _params) // here it receives also r cutoff
+                             const param_type HOOMD_CREF _params) // here it receives also r cutoff
         : rij_sq(_rij_sq), rcutsq(_rcutsq), sigma_dev(_params.sigma), n_dev(_params.n),
           epsilon_dev(_params.epsilon), lambda3_dev(_params.lambda3)
         {
@@ -129,7 +129,7 @@ class EvaluatorRevCross
         }
 
     //! Evaluate the repulsive and attractive terms of the force
-    DEVICE bool evalRepulsiveAndAttractive(Scalar& invratio, Scalar& invratio2)
+    DEVICE bool evalRepulsiveAndAttractive(Scalar HOOMD_THREAD& invratio, Scalar HOOMD_THREAD& invratio2)
         {
         if ((rij_sq < rcutsq) && (epsilon_dev != Scalar(0.0)))
             {
@@ -147,19 +147,19 @@ class EvaluatorRevCross
         }
 
     //! We do not have to evaluate chi
-    DEVICE void evalChi(Scalar& chi) { }
+    DEVICE void evalChi(Scalar HOOMD_THREAD& chi) { }
 
     //! We don't have a scalar ij contribution
-    DEVICE void evalPhi(Scalar& phi) { }
+    DEVICE void evalPhi(Scalar HOOMD_THREAD& phi) { }
 
     //! Evaluate the force and potential energy due to ij interactions
     DEVICE void evalForceij(Scalar invratio,
                             Scalar invratio2,
                             Scalar chi,  // not used
                             Scalar phi,  // not used
-                            Scalar& bij, // not used
-                            Scalar& force_divr,
-                            Scalar& potential_eng)
+                            Scalar HOOMD_THREAD& bij, // not used
+                            Scalar HOOMD_THREAD& force_divr,
+                            Scalar HOOMD_THREAD& potential_eng)
         {
         // compute the ij force
         // the force term includes rij_sq^-1 from the derivative over the distance and a factor 0.5
@@ -171,15 +171,15 @@ class EvaluatorRevCross
         potential_eng = epsilon_dev * (invratio2 - invratio);
         }
 
-    DEVICE void evalSelfEnergy(Scalar& energy, Scalar phi) { }
+    DEVICE void evalSelfEnergy(Scalar HOOMD_THREAD& energy, Scalar phi) { }
 
     //! Evaluate the forces due to ijk interactions
     DEVICE bool evalForceik(Scalar ijinvratio,
                             Scalar ijinvratio2,
                             Scalar chi, // not used
                             Scalar bij, // not used
-                            Scalar3& IN_force_divr_ij,
-                            Scalar3& IN_force_divr_ik)
+                            Scalar3 HOOMD_THREAD& IN_force_divr_ij,
+                            Scalar3 HOOMD_THREAD& IN_force_divr_ik)
         {
         if (rik_sq < rcutsq)
             {
@@ -250,7 +250,7 @@ class EvaluatorRevCross
         }
 #endif
 
-    static const bool flag_for_RevCross = true;
+    static constexpr HOOMD_CONSTANT bool flag_for_RevCross = true;
 
     protected:
     Scalar rij_sq; //!< Stored rij_sq from the constructor

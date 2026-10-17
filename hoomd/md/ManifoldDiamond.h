@@ -7,7 +7,7 @@
 #include "hoomd/BoxDim.h"
 #include "hoomd/HOOMDMath.h"
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
 #include <pybind11/pybind11.h>
 #endif
 
@@ -47,6 +47,9 @@ namespace md
 class ManifoldDiamond
     {
     public:
+    //! Default constructor (for kernel argument structs)
+    DEVICE ManifoldDiamond() = default;
+
     //! Constructs the manifold class
     /* \param _N vector determining the number of unitcells in x-, y-, and z-direction
        \param _epsilon Defines the specific constant mean curvture companion
@@ -62,7 +65,7 @@ class ManifoldDiamond
         \return result of the nodal function at input point
     */
 
-    DEVICE Scalar implicitFunction(const Scalar3& point)
+    DEVICE Scalar implicitFunction(const Scalar3 HOOMD_CREF point)
         {
         Scalar cx, sx;
         fast::sincos(Lx * point.x, sx, cx);
@@ -79,7 +82,7 @@ class ManifoldDiamond
         \return normal of the Diamond surface at input point
     */
 
-    DEVICE Scalar3 derivative(const Scalar3& point)
+    DEVICE Scalar3 derivative(const Scalar3 HOOMD_CREF point)
         {
         Scalar cx, sx;
         fast::sincos(Lx * point.x, sx, cx);
@@ -93,7 +96,7 @@ class ManifoldDiamond
                             -Lz * (cx * cy * sz + sx * sy * cz));
         }
 
-    DEVICE bool fitsInsideBox(const BoxDim& box)
+    DEVICE bool fitsInsideBox(const BoxDim HOOMD_CREF box)
         {
         Scalar3 box_length = box.getHi() - box.getLo();
 
@@ -105,7 +108,7 @@ class ManifoldDiamond
                      // accepted
         }
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     pybind11::tuple getN()
         {
         return pybind11::make_tuple(Nx, Ny, Nz);

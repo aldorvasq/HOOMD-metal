@@ -75,7 +75,7 @@ class EvaluatorSquareDensity
         \param _rcutsq Squared distance at which the potential goes to zero
         \param _params Per type-pair parameters for this potential
     */
-    DEVICE EvaluatorSquareDensity(Scalar _rij_sq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorSquareDensity(Scalar _rij_sq, Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rij_sq(_rij_sq), rcutsq(_rcutsq), A(_params.A), B(_params.B)
         {
         }
@@ -127,17 +127,17 @@ class EvaluatorSquareDensity
         }
 
     //! Evaluate the repulsive and attractive terms of the force
-    DEVICE bool evalRepulsiveAndAttractive(Scalar& fR, Scalar& fA)
+    DEVICE bool evalRepulsiveAndAttractive(Scalar HOOMD_THREAD& fR, Scalar HOOMD_THREAD& fA)
         {
         // this method does nothing except checking if we're inside the cut-off
         return (rij_sq < rcutsq);
         }
 
     //! Evaluate chi (the scalar ik contribution) for this triplet
-    DEVICE void evalChi(Scalar& chi) { }
+    DEVICE void evalChi(Scalar HOOMD_THREAD& chi) { }
 
     //! Evaluate chi (the scalar ij contribution) for this triplet
-    DEVICE void evalPhi(Scalar& phi)
+    DEVICE void evalPhi(Scalar HOOMD_THREAD& phi)
         {
         // add up density n_i
         if (rij_sq < rcutsq)
@@ -157,9 +157,9 @@ class EvaluatorSquareDensity
                             Scalar fA,
                             Scalar chi,
                             Scalar phi,
-                            Scalar& bij,
-                            Scalar& force_divr,
-                            Scalar& potential_eng)
+                            Scalar HOOMD_THREAD& bij,
+                            Scalar HOOMD_THREAD& force_divr,
+                            Scalar HOOMD_THREAD& potential_eng)
         {
         if (rij_sq < rcutsq)
             {
@@ -177,7 +177,7 @@ class EvaluatorSquareDensity
             }
         }
 
-    DEVICE void evalSelfEnergy(Scalar& energy, Scalar phi)
+    DEVICE void evalSelfEnergy(Scalar HOOMD_THREAD& energy, Scalar phi)
         {
         Scalar rho_i = phi;
 
@@ -190,8 +190,8 @@ class EvaluatorSquareDensity
                             Scalar fA,
                             Scalar chi,
                             Scalar bij,
-                            Scalar3& force_divr_ij,
-                            Scalar3& force_divr_ik)
+                            Scalar3 HOOMD_THREAD& force_divr_ij,
+                            Scalar3 HOOMD_THREAD& force_divr_ik)
         {
         return false;
         }
@@ -211,7 +211,7 @@ class EvaluatorSquareDensity
         }
 #endif
 
-    static const bool flag_for_RevCross = false;
+    static constexpr HOOMD_CONSTANT bool flag_for_RevCross = false;
 
     protected:
     Scalar rij_sq; //!< Stored rij_sq from the constructor

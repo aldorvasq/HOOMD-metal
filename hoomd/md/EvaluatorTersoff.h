@@ -121,7 +121,7 @@ class EvaluatorTersoff
         \param _rcutsq Squared distance at which the potential goes to zero
         \param _params Per type-pair parameters for this potential
     */
-    DEVICE EvaluatorTersoff(Scalar _rij_sq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorTersoff(Scalar _rij_sq, Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rij_sq(_rij_sq), rcutsq(_rcutsq), cutoff_shell_thickness(_params.cutoff_thickness),
           tersoff_A(_params.coeffs.x), tersoff_B(_params.coeffs.y), lambda_R(_params.exp_consts.x),
           lambda_A(_params.exp_consts.y), dimer_separation(_params.dimer_r),
@@ -184,7 +184,7 @@ class EvaluatorTersoff
         }
 
     //! Evaluate the repulsive and attractive terms of the force
-    DEVICE bool evalRepulsiveAndAttractive(Scalar& fR, Scalar& fA)
+    DEVICE bool evalRepulsiveAndAttractive(Scalar HOOMD_THREAD& fR, Scalar HOOMD_THREAD& fA)
         {
         if (rij_sq < rcutsq && (tersoff_A > Scalar(0.0) || tersoff_B > Scalar(0.0)))
             {
@@ -204,7 +204,7 @@ class EvaluatorTersoff
         }
 
     //! Evaluate chi for this triplet
-    DEVICE void evalChi(Scalar& chi)
+    DEVICE void evalChi(Scalar HOOMD_THREAD& chi)
         {
         if (rik_sq < rcutsq && gamman != 0)
             {
@@ -247,16 +247,16 @@ class EvaluatorTersoff
         }
 
     //! We don't have a scalar ij contribution
-    DEVICE void evalPhi(Scalar& chi) { }
+    DEVICE void evalPhi(Scalar HOOMD_THREAD& chi) { }
 
     //! Evaluate the force and potential energy due to ij interactions
     DEVICE void evalForceij(Scalar fR,
                             Scalar fA,
                             Scalar chi,
                             Scalar phi,
-                            Scalar& bij,
-                            Scalar& force_divr,
-                            Scalar& potential_eng)
+                            Scalar HOOMD_THREAD& bij,
+                            Scalar HOOMD_THREAD& force_divr,
+                            Scalar HOOMD_THREAD& potential_eng)
         {
         // compute rij, rcut, and r_shell_inner
         Scalar rij = fast::sqrt(rij_sq);
@@ -304,15 +304,15 @@ class EvaluatorTersoff
         potential_eng = Scalar(0.5) * fcut_ij * (fR - bij * fA);
         }
 
-    DEVICE void evalSelfEnergy(Scalar& energy, Scalar phi) { }
+    DEVICE void evalSelfEnergy(Scalar HOOMD_THREAD& energy, Scalar phi) { }
 
     //! Evaluate the forces due to ijk interactions
     DEVICE bool evalForceik(Scalar fR,
                             Scalar fA,
                             Scalar chi,
                             Scalar bij,
-                            Scalar3& force_divr_ij,
-                            Scalar3& force_divr_ik)
+                            Scalar3 HOOMD_THREAD& force_divr_ij,
+                            Scalar3 HOOMD_THREAD& force_divr_ik)
         {
         if (rik_sq < rcutsq && chi != Scalar(0.0))
             {
@@ -433,7 +433,7 @@ class EvaluatorTersoff
         }
 #endif
 
-    static const bool flag_for_RevCross = false;
+    static constexpr HOOMD_CONSTANT bool flag_for_RevCross = false;
 
     protected:
     Scalar rij_sq;                 //!< Stored rij_sq from the constructor

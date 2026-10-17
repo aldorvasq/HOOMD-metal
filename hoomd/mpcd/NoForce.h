@@ -36,7 +36,7 @@ class NoForce
      *
      * This just returns zero, meaning no force. Hopefully the compiler will optimize this out!
      */
-    HOSTDEVICE INLINE Scalar3 evaluate(const Scalar3& r) const
+    HOSTDEVICE INLINE Scalar3 evaluate(const Scalar3 HOOMD_CREF r) const
         {
         return make_scalar3(0, 0, 0);
         }

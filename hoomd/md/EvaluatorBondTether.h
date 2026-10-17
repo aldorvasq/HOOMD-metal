@@ -97,7 +97,7 @@ class EvaluatorBondTether
     /*! \param _rsq Squared distance between the particles
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorBondTether(Scalar _rsq, const param_type& _params)
+    DEVICE EvaluatorBondTether(Scalar _rsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), k_b(_params.k_b), l_min(_params.l_min), l_c1(_params.l_c1), l_c0(_params.l_c0),
           l_max(_params.l_max)
         {
@@ -122,7 +122,7 @@ class EvaluatorBondTether
         \return True if they are evaluated or false if the bond
                 energy is not defined
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& bond_eng)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& bond_eng)
         {
         Scalar r = sqrt(rsq);
         Scalar U_att = Scalar(0.0);

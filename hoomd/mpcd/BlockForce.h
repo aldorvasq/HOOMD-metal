@@ -66,7 +66,7 @@ class __attribute__((visibility("default"))) BlockForce
      * \param r Particle position.
      * \returns Force on the particle.
      */
-    HOSTDEVICE Scalar3 evaluate(const Scalar3& r) const
+    HOSTDEVICE Scalar3 evaluate(const Scalar3 HOOMD_CREF r) const
         {
         // sign = +1 if in top slab, -1 if in bottom slab, 0 if neither
         const signed char sign = (char)((r.y >= m_H_minus_w && r.y < m_H_plus_w)

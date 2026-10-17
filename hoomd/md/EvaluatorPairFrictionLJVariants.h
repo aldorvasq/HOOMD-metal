@@ -25,13 +25,17 @@ namespace hoomd
 namespace md
     {
 
-class EvaluatorPairFrictionLJLinear
-    : public EvaluatorPairFrictionLJBase<EvaluatorPairFrictionLJLinear>
+//! Friction law of EvaluatorPairFrictionLJLinear
+struct FrictionLJLinearLaw
     {
-    public:
-    using EvaluatorPairFrictionLJBase<EvaluatorPairFrictionLJLinear>::EvaluatorPairFrictionLJBase;
-
-    HOSTDEVICE void eval_factors(Scalar& factor_f, Scalar& factor_r, Scalar w, Scalar du)
+    HOSTDEVICE static void eval_factors(Scalar HOOMD_THREAD& factor_f,
+                                        Scalar HOOMD_THREAD& factor_r,
+                                        Scalar w,
+                                        Scalar du,
+                                        Scalar gamma,
+                                        Scalar kappa,
+                                        Scalar pair_temp,
+                                        Scalar nu_ij)
         {
         Scalar f = gamma;
 
@@ -39,7 +43,7 @@ class EvaluatorPairFrictionLJLinear
         factor_r = fast::sqrt(factor_f);
         }
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     static std::string getName()
         {
         return "FrictionLJLinear";
@@ -47,13 +51,17 @@ class EvaluatorPairFrictionLJLinear
 #endif
     };
 
-class EvaluatorPairFrictionLJCoulomb
-    : public EvaluatorPairFrictionLJBase<EvaluatorPairFrictionLJCoulomb>
+//! Friction law of EvaluatorPairFrictionLJCoulomb
+struct FrictionLJCoulombLaw
     {
-    public:
-    using EvaluatorPairFrictionLJBase<EvaluatorPairFrictionLJCoulomb>::EvaluatorPairFrictionLJBase;
-
-    HOSTDEVICE void eval_factors(Scalar& factor_f, Scalar& factor_r, Scalar w, Scalar du)
+    HOSTDEVICE static void eval_factors(Scalar HOOMD_THREAD& factor_f,
+                                        Scalar HOOMD_THREAD& factor_r,
+                                        Scalar w,
+                                        Scalar du,
+                                        Scalar gamma,
+                                        Scalar kappa,
+                                        Scalar pair_temp,
+                                        Scalar nu_ij)
         {
         Scalar f = kappa / du;
         Scalar D = Scalar(0.0);
@@ -66,7 +74,7 @@ class EvaluatorPairFrictionLJCoulomb
         factor_r = fast::sqrt(w * D);
         }
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     static std::string getName()
         {
         return "FrictionLJCoulomb";
@@ -74,14 +82,17 @@ class EvaluatorPairFrictionLJCoulomb
 #endif
     };
 
-class EvaluatorPairFrictionLJCoulombNewton
-    : public EvaluatorPairFrictionLJBase<EvaluatorPairFrictionLJCoulombNewton>
+//! Friction law of EvaluatorPairFrictionLJCoulombNewton
+struct FrictionLJCoulombNewtonLaw
     {
-    public:
-    using EvaluatorPairFrictionLJBase<
-        EvaluatorPairFrictionLJCoulombNewton>::EvaluatorPairFrictionLJBase;
-
-    HOSTDEVICE void eval_factors(Scalar& factor_f, Scalar& factor_r, Scalar w, Scalar du)
+    HOSTDEVICE static void eval_factors(Scalar HOOMD_THREAD& factor_f,
+                                        Scalar HOOMD_THREAD& factor_r,
+                                        Scalar w,
+                                        Scalar du,
+                                        Scalar gamma,
+                                        Scalar kappa,
+                                        Scalar pair_temp,
+                                        Scalar nu_ij)
         {
         Scalar f = Scalar(0.0);
         Scalar D = Scalar(0.0);
@@ -111,13 +122,19 @@ class EvaluatorPairFrictionLJCoulombNewton
         factor_r = fast::sqrt(D);
         }
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     static std::string getName()
         {
         return "FrictionLJCoulombNewton";
         }
 #endif
     };
+
+typedef EvaluatorPairFrictionLJBase<FrictionLJLinearLaw> EvaluatorPairFrictionLJLinear;
+typedef EvaluatorPairFrictionLJBase<FrictionLJCoulombLaw> EvaluatorPairFrictionLJCoulomb;
+typedef EvaluatorPairFrictionLJBase<FrictionLJCoulombNewtonLaw>
+    EvaluatorPairFrictionLJCoulombNewton;
+
     } // namespace md
     } // namespace hoomd
 

@@ -37,7 +37,7 @@
 #define UP_ASSERT_CLOSE(a, b, eps)                                                \
     upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT_CLOSE"), \
         upp11::TestAssert(LOCATION).assertTrue(                                   \
-            std::abs((a) - (b)) <= (eps) * std::min(std::abs(a), std::abs(b)),    \
+            std::abs((a) - (b)) <= (eps) * std::min<double>(std::abs(a), std::abs(b)), \
             #a " (" + std::to_string(a) + ") close to " #b " (" + std::to_string(b) + ")")
 
 //! Macro to test if a floating-point value is close to zero
@@ -112,7 +112,8 @@
 //! Helper macro for checking if two numbers are close
 #define MY_CHECK_CLOSE(a, b, tolerance) \
     UP_ASSERT(std::abs((a) - (b))       \
-              <= std::max({(tolerance) * std::abs(a), (tolerance) * std::abs(a), (tolerance)}))
+              <= std::max<double>({(tolerance) * std::abs(a), (tolerance) * std::abs(a), \
+                                   (tolerance)}))
 //! Helper macro for checking if a number is small
 #define MY_CHECK_SMALL(a, c) CHECK_SMALL(a, hoomd::Scalar(c))
 //! Need a simple define for checking two values which are unsigned

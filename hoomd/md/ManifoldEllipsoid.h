@@ -7,7 +7,7 @@
 #include "hoomd/BoxDim.h"
 #include "hoomd/HOOMDMath.h"
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
 #include <pybind11/pybind11.h>
 #endif
 
@@ -52,6 +52,9 @@ namespace md
 class ManifoldEllipsoid
     {
     public:
+    //! Default constructor (for kernel argument structs)
+    DEVICE ManifoldEllipsoid() = default;
+
     //! Constructs the manifold class
     /*! \param _Px center position in x-direction
         \param _Py center position in y-direction
@@ -72,7 +75,7 @@ class ManifoldEllipsoid
         \return result of the nodal function at input point
     */
 
-    DEVICE Scalar implicitFunction(const Scalar3& point)
+    DEVICE Scalar implicitFunction(const Scalar3 HOOMD_CREF point)
         {
         return inv_a2 * (point.x - Px) * (point.x - Px) + inv_b2 * (point.y - Py) * (point.y - Py)
                + inv_c2 * (point.z - Pz) * (point.z - Pz) - 1;
@@ -84,14 +87,14 @@ class ManifoldEllipsoid
         \return normal of the Ellipsoid surface at input point
     */
 
-    DEVICE Scalar3 derivative(const Scalar3& point)
+    DEVICE Scalar3 derivative(const Scalar3 HOOMD_CREF point)
         {
         return make_scalar3(2 * inv_a2 * (point.x - Px),
                             2 * inv_b2 * (point.y - Py),
                             2 * inv_c2 * (point.z - Pz));
         }
 
-    DEVICE bool fitsInsideBox(const BoxDim& box)
+    DEVICE bool fitsInsideBox(const BoxDim HOOMD_CREF box)
         {
         Scalar3 lo = box.getLo();
         Scalar3 hi = box.getHi();
@@ -122,7 +125,7 @@ class ManifoldEllipsoid
         return c;
         };
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     pybind11::tuple getP()
         {
         return pybind11::make_tuple(Px, Py, Pz);

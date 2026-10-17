@@ -56,9 +56,9 @@ class EvaluatorPairMie
         Scalar sigma;
         Scalar epsilon;
 
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
 #ifdef ENABLE_HIP
         // set CUDA memory hints
@@ -101,7 +101,7 @@ class EvaluatorPairMie
         \param -m Second, smaller exponent that captures attraction
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorPairMie(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorPairMie(Scalar _rsq, Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), rcutsq(_rcutsq), mie1(_params.m1), mie2(_params.m2), mie3(_params.m3),
           mie4(_params.m4)
         {
@@ -127,7 +127,7 @@ class EvaluatorPairMie
 
         \return True if they are evaluated or false if they are not because we are beyond the cutoff
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& pair_eng, bool energy_shift)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& pair_eng, bool energy_shift)
         {
         // compute the force divided by r in force_divr
         if (rsq < rcutsq && mie1 != 0)

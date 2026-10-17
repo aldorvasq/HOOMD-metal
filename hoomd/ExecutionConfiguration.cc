@@ -295,6 +295,10 @@ std::string ExecutionConfiguration::describeGPU(int id, hipDeviceProp_t prop)
     s << "[" << id << "]";
     s << setw(22) << prop.name;
 
+#ifdef __HIP_PLATFORM_METAL__
+    // Metal does not report clock rates: print the GPU core count and Apple GPU family
+    s << setw(4) << prop.multiProcessorCount << " cores, Apple" << prop.major;
+#else
     // then print the SM count and version
     s << setw(4) << prop.multiProcessorCount << " SM_" << prop.major << "." << prop.minor;
 
@@ -304,6 +308,7 @@ std::string ExecutionConfiguration::describeGPU(int id, hipDeviceProp_t prop)
     s.fill('0');
     s << " @ " << setw(4) << ghz << " GHz";
     s.fill(' ');
+#endif
 
     // and the total amount of memory
     int mib = int(float(prop.totalGlobalMem) / float(1024 * 1024));

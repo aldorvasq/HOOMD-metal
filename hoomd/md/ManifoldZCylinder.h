@@ -7,7 +7,7 @@
 #include "hoomd/BoxDim.h"
 #include "hoomd/HOOMDMath.h"
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
 #include <pybind11/pybind11.h>
 #endif
 
@@ -50,6 +50,9 @@ namespace md
 class ManifoldZCylinder
     {
     public:
+    //! Default constructor (for kernel argument structs)
+    DEVICE ManifoldZCylinder() = default;
+
     //! Constructs the manifold class
     /*! \param _P center position in x-y-z coordinates
         \param _R radius
@@ -65,7 +68,7 @@ class ManifoldZCylinder
         \return result of the nodal function at input point
     */
 
-    DEVICE Scalar implicitFunction(const Scalar3& point)
+    DEVICE Scalar implicitFunction(const Scalar3 HOOMD_CREF point)
         {
         return (point.x - Px) * (point.x - Px) + (point.y - Py) * (point.y - Py) - R_sq;
         }
@@ -76,12 +79,12 @@ class ManifoldZCylinder
         \return normal of the Cylinder surface at input point
     */
 
-    DEVICE Scalar3 derivative(const Scalar3& point)
+    DEVICE Scalar3 derivative(const Scalar3 HOOMD_CREF point)
         {
         return make_scalar3(2 * (point.x - Px), 2 * (point.y - Py), 0);
         }
 
-    DEVICE bool fitsInsideBox(const BoxDim& box)
+    DEVICE bool fitsInsideBox(const BoxDim HOOMD_CREF box)
         {
         Scalar3 lo = box.getLo();
         Scalar3 hi = box.getHi();
@@ -102,7 +105,7 @@ class ManifoldZCylinder
         return sqrt(R_sq);
         };
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     pybind11::tuple getP()
         {
         return pybind11::make_tuple(Px, Py, Pz);

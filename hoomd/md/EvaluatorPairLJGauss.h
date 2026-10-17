@@ -52,9 +52,9 @@ class EvaluatorPairLJGauss
         Scalar sigma;
         Scalar r0;
 
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
 #ifdef ENABLE_HIP
         //! Set CUDA memory hints
@@ -92,7 +92,7 @@ class EvaluatorPairLJGauss
         \param _rcutsq Squared distance at which the potential goes to 0
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorPairLJGauss(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorPairLJGauss(Scalar _rsq, Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), rcutsq(_rcutsq), epsilon(_params.epsilon), sigma(_params.sigma), r0(_params.r0)
         {
         }
@@ -110,7 +110,7 @@ class EvaluatorPairLJGauss
     DEVICE void setCharge(Scalar qi, Scalar qj) { }
 
     //! Get the number of alchemical parameters
-    static const unsigned int num_alchemical_parameters = 3;
+    static HOOMD_CONSTANT const unsigned int num_alchemical_parameters = 3;
 
     //! Evaluate the force and energy
     /*! \param force_divr Output parameter to write the computed force divided by r.
@@ -121,7 +121,7 @@ class EvaluatorPairLJGauss
         \return True if they are evaluated or false if they are not because we are beyond the
        cuttoff
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& pair_eng, bool energy_shift)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& pair_eng, bool energy_shift)
         {
         // compute the force divided by r in force_divr
         if (rsq >= rcutsq)

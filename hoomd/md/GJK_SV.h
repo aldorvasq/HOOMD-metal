@@ -23,18 +23,18 @@ namespace detail
 
 // Define matrix vector multiplication since it's faster than quat vector.
 template<typename Scalar>
-HOSTDEVICE inline vec3<Scalar> rotate(const Scalar (&mat)[3][3], const vec3<Scalar>& v)
+HOSTDEVICE inline vec3<Scalar> rotate(const Scalar HOOMD_THREAD (&mat)[3][3], const vec3<Scalar> HOOMD_CREF v)
     {
     return vec3<Scalar>(mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z,
                         mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z,
                         mat[2][0] * v.x + mat[2][1] * v.y + mat[2][2] * v.z);
     }
 
-HOSTDEVICE inline void support_polyhedron(const ManagedArray<vec3<Scalar>>& verts,
-                                          const vec3<Scalar>& vector,
-                                          const Scalar (&mat)[3][3],
+HOSTDEVICE inline void support_polyhedron(const ManagedArray<vec3<Scalar>> HOOMD_CREF verts,
+                                          const vec3<Scalar> HOOMD_CREF vector,
+                                          const Scalar HOOMD_THREAD (&mat)[3][3],
                                           const vec3<Scalar> shift,
-                                          unsigned int& idx)
+                                          unsigned int HOOMD_THREAD& idx)
     {
     // Compute the support function of the polyhedron.
     unsigned int index = 0;
@@ -53,10 +53,10 @@ HOSTDEVICE inline void support_polyhedron(const ManagedArray<vec3<Scalar>>& vert
     idx = index;
     }
 
-HOSTDEVICE inline void support_ellipsoid(const vec3<Scalar>& rounding_radii,
-                                         const vec3<Scalar>& vector,
-                                         const quat<Scalar>& q,
-                                         vec3<Scalar>& ellipsoid_support_vector)
+HOSTDEVICE inline void support_ellipsoid(const vec3<Scalar> HOOMD_CREF rounding_radii,
+                                         const vec3<Scalar> HOOMD_CREF vector,
+                                         const quat<Scalar> HOOMD_CREF q,
+                                         vec3<Scalar> HOOMD_THREAD& ellipsoid_support_vector)
     {
     // Compute the support function of the rounding ellipsoid. Since we only
     // have the principal axes, we have to rotate the vector into the principal
@@ -91,7 +91,7 @@ HOSTDEVICE inline unsigned int compareSigns(Scalar a, Scalar b)
  * combination of W represents the point of minimum norm.
  */
 template<unsigned int ndim>
-HOSTDEVICE inline void s1d(vec3<Scalar>* W, unsigned int& W_used, Scalar* lambdas)
+HOSTDEVICE inline void s1d(vec3<Scalar> HOOMD_THREAD* W, unsigned int HOOMD_THREAD& W_used, Scalar HOOMD_THREAD* lambdas)
     {
     // Identify the appropriate indices
     constexpr unsigned int max_num_points = ndim + 1;
@@ -169,7 +169,7 @@ HOSTDEVICE inline void s1d(vec3<Scalar>* W, unsigned int& W_used, Scalar* lambda
  * combination of W represents the point of minimum norm.
  */
 template<unsigned int ndim>
-HOSTDEVICE inline void s2d(vec3<Scalar>* W, unsigned int& W_used, Scalar* lambdas)
+HOSTDEVICE inline void s2d(vec3<Scalar> HOOMD_THREAD* W, unsigned int HOOMD_THREAD& W_used, Scalar HOOMD_THREAD* lambdas)
     {
     // This function is always called with two points. This constant is defined
     // to avoid magical 3s everywhere in loops.
@@ -317,7 +317,7 @@ HOSTDEVICE inline void s2d(vec3<Scalar>* W, unsigned int& W_used, Scalar* lambda
  * \param lambdas The multipliers (that will be overwritten in place) that indicate what linear
  * combination of W represents the point of minimum norm.
  */
-HOSTDEVICE inline void s3d(vec3<Scalar>* W, unsigned int& W_used, Scalar* lambdas)
+HOSTDEVICE inline void s3d(vec3<Scalar> HOOMD_THREAD* W, unsigned int HOOMD_THREAD& W_used, Scalar HOOMD_THREAD* lambdas)
     {
     // This function is always called with 4 points, so a constant is defined
     // for clarity.
@@ -426,7 +426,7 @@ HOSTDEVICE inline void s3d(vec3<Scalar>* W, unsigned int& W_used, Scalar* lambda
  * combination of W represents the point of minimum norm.
  */
 template<unsigned int ndim>
-HOSTDEVICE inline void sv_subalgorithm(vec3<Scalar>* W, unsigned int& W_used, Scalar* lambdas)
+HOSTDEVICE inline void sv_subalgorithm(vec3<Scalar> HOOMD_THREAD* W, unsigned int HOOMD_THREAD& W_used, Scalar HOOMD_THREAD* lambdas)
     {
     // The W array is never modified by this function.  The W_used may be
     // modified if necessary, and the lambdas will be updated.  All the other
@@ -614,20 +614,20 @@ HOSTDEVICE inline void sv_subalgorithm(vec3<Scalar>* W, unsigned int& W_used, Sc
  * function.
  */
 template<unsigned int ndim>
-HOSTDEVICE inline void gjk(const ManagedArray<vec3<Scalar>>& verts1,
-                           const ManagedArray<vec3<Scalar>>& verts2,
-                           vec3<Scalar>& v,
-                           vec3<Scalar>& a,
-                           vec3<Scalar>& b,
-                           bool& success,
-                           bool& overlap,
-                           const Scalar (&mati)[3][3],
-                           const Scalar (&matj)[3][3],
-                           const quat<Scalar>& qi,
-                           const quat<Scalar>& qj,
-                           const vec3<Scalar>& dr,
-                           const vec3<Scalar>& rounding_radii1,
-                           const vec3<Scalar>& rounding_radii2,
+HOSTDEVICE inline void gjk(const ManagedArray<vec3<Scalar>> HOOMD_CREF verts1,
+                           const ManagedArray<vec3<Scalar>> HOOMD_CREF verts2,
+                           vec3<Scalar> HOOMD_THREAD& v,
+                           vec3<Scalar> HOOMD_THREAD& a,
+                           vec3<Scalar> HOOMD_THREAD& b,
+                           bool HOOMD_THREAD& success,
+                           bool HOOMD_THREAD& overlap,
+                           const Scalar HOOMD_THREAD (&mati)[3][3],
+                           const Scalar HOOMD_THREAD (&matj)[3][3],
+                           const quat<Scalar> HOOMD_CREF qi,
+                           const quat<Scalar> HOOMD_CREF qj,
+                           const vec3<Scalar> HOOMD_CREF dr,
+                           const vec3<Scalar> HOOMD_CREF rounding_radii1,
+                           const vec3<Scalar> HOOMD_CREF rounding_radii2,
                            bool has_rounding1,
                            bool has_rounding2)
     {
@@ -709,8 +709,9 @@ HOSTDEVICE inline void gjk(const ManagedArray<vec3<Scalar>>& verts1,
         // it introduces branch divergence (at least one thread almost always
         // needs the algorithm to run to completion, so the early termination
         // due to degeneracy just adds extra work to check degeneracy without
-        // any corresponding performance gains).
-#ifndef __HIPCC__
+        // any corresponding performance gains). Metal keeps the check: without it, rounding can
+        // add a point that is already in the simplex, and the subalgorithm then divides 0/0.
+#if !defined(__HIPCC__) || defined(__HIP_PLATFORM_METAL__)
         bool degenerate(false);
         for (unsigned int i = 0; i < max_num_points; ++i)
             {
@@ -728,7 +729,7 @@ HOSTDEVICE inline void gjk(const ManagedArray<vec3<Scalar>>& verts1,
         // intersect! Actually finding an intersection requires waiting until
         // we actually have an affinely dependent set of points, though.
         u = u > d ? u : d;
-#ifdef __HIPCC__
+#if defined(__HIPCC__) && !defined(__HIP_PLATFORM_METAL__)
         close_enough = (((vnorm - u) <= eps * vnorm) || (vnorm < omega));
 #else
         close_enough = (degenerate || ((vnorm - u) <= eps * vnorm) || (vnorm < omega));

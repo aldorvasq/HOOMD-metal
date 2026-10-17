@@ -26,8 +26,19 @@ if(ENABLE_HIP)
         # hipCUB
         # Use system provided CUB for CUDA 11 and newer
         set(HIPCUB_INCLUDE_DIR "$<IF:$<STREQUAL:${CMAKE_PROJECT_NAME},HOOMD>,${CMAKE_CURRENT_SOURCE_DIR},${HOOMD_INSTALL_PREFIX}/${PYTHON_SITE_INSTALL_DIR}/include>/hoomd/extern/hipCUB/hipcub/include/")
+    elseif (HOOMD_GPU_PLATFORM STREQUAL "Metal")
+        # Apple GPUs: HOOMD's HIP code paths run on the HIP-on-Metal runtime in hoomd/mtl and the
+        # kernels are written in the Metal Shading Language (.metal files).
+        ENABLE_LANGUAGE(OBJCXX)
+        SET(HOOMD_DEVICE_LANGUAGE CXX)
+        set(HIP_PLATFORM "metal")
+        set(HIP_VERSION_MAJOR 6)
+        set(HIP_VERSION_MINOR 0)
+        set(HIP_VERSION_PATCH 0)
+        set(HIP_INCLUDE_DIR "$<IF:$<STREQUAL:${CMAKE_PROJECT_NAME},HOOMD>,${CMAKE_CURRENT_SOURCE_DIR},${HOOMD_INSTALL_PREFIX}/${PYTHON_SITE_INSTALL_DIR}/include>/hoomd/mtl/include/")
+        set(HIPCUB_INCLUDE_DIR "${HIP_INCLUDE_DIR}")
     else()
-        message(FATAL_ERROR "HOOMD_GPU_PLATFORM must be either CUDA or HIP")
+        message(FATAL_ERROR "HOOMD_GPU_PLATFORM must be CUDA, HIP, or Metal")
     endif()
 
     if(NOT TARGET hip::host)
@@ -50,7 +61,11 @@ if(ENABLE_HIP)
         set_property(TARGET hip::host APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS __HIP_PLATFORM_NVCC__)
     elseif(${HIP_PLATFORM} STREQUAL "amd")
         set_property(TARGET hip::host APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS __HIP_PLATFORM_AMD__ __HIP_PLATFORM_HCC__)
+    elseif(${HIP_PLATFORM} STREQUAL "metal")
+        set_property(TARGET hip::host APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS __HIP_PLATFORM_METAL__)
     endif()
 
-    find_package(CUDALibs REQUIRED)
+    if (NOT HIP_PLATFORM STREQUAL "metal")
+        find_package(CUDALibs REQUIRED)
+    endif()
 endif()

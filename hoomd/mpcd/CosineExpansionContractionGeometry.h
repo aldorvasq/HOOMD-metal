@@ -101,7 +101,7 @@ class __attribute__((visibility("default"))) CosineExpansionContractionGeometry
      * is updated according to the appropriate bounce back rule, and the integration time \a dt is
      * decreased to the amount of time remaining.
      */
-    HOSTDEVICE bool detectCollision(Scalar3& pos, Scalar3& vel, Scalar& dt) const
+    HOSTDEVICE bool detectCollision(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, Scalar HOOMD_THREAD& dt) const
         {
         /*
          * Detect if particle has left the box. The sign used
@@ -274,7 +274,7 @@ class __attribute__((visibility("default"))) CosineExpansionContractionGeometry
      * \param pos Current particle position
      * \returns True if particle is out of bounds, and false otherwise
      */
-    HOSTDEVICE bool isOutside(const Scalar3& pos) const
+    HOSTDEVICE bool isOutside(const Scalar3 HOOMD_CREF pos) const
         {
         const Scalar a = 0.5 * (m_H_wide - m_H_narrow) * fast::cos(pos.x * m_wavenumber)
                          + 0.5 * (m_H_wide - m_H_narrow) + m_H_narrow;
@@ -290,7 +290,7 @@ class __attribute__((visibility("default"))) CosineExpansionContractionGeometry
      * the cells just outside the highest point of the cosine would not interact with each
      * other through the boundary.
      */
-    HOSTDEVICE bool validateBox(const BoxDim& box, Scalar cell_size) const
+    HOSTDEVICE bool validateBox(const BoxDim HOOMD_CREF box, Scalar cell_size) const
         {
         const Scalar hi = box.getHi().y;
         const Scalar lo = box.getLo().y;
@@ -304,7 +304,7 @@ class __attribute__((visibility("default"))) CosineExpansionContractionGeometry
      *
      * No velocity contribution is needed as the wall is stationary.
      */
-    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3& vel, const Scalar3& pos) const { }
+    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3 HOOMD_THREAD& vel, const Scalar3 HOOMD_CREF pos) const { }
 
     //! Get channel width at widest point
     /*!

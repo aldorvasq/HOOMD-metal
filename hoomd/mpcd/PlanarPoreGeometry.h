@@ -69,7 +69,7 @@ class __attribute__((visibility("default"))) PlanarPoreGeometry
      * The passed value of \a dt must be the time taken to arrive at pos. The returned value of \a
      * dt will be less than this time.
      */
-    HOSTDEVICE bool detectCollision(Scalar3& pos, Scalar3& vel, Scalar& dt) const
+    HOSTDEVICE bool detectCollision(Scalar3 HOOMD_THREAD& pos, Scalar3 HOOMD_THREAD& vel, Scalar HOOMD_THREAD& dt) const
         {
         /* First check that the particle ended up inside the pore or walls.
          * sign.x is +1 if outside pore in +x, -1 if outside pore in -x, and 0 otherwise.
@@ -163,7 +163,7 @@ class __attribute__((visibility("default"))) PlanarPoreGeometry
      * \param pos Current particle position
      * \returns True if particle is out of bounds, and false otherwise
      */
-    HOSTDEVICE bool isOutside(const Scalar3& pos) const
+    HOSTDEVICE bool isOutside(const Scalar3 HOOMD_CREF pos) const
         {
         return ((pos.x > -m_L && pos.x < m_L) && (pos.y > m_H || pos.y < -m_H));
         }
@@ -175,7 +175,7 @@ class __attribute__((visibility("default"))) PlanarPoreGeometry
      *
      * No velocity contribution is needed as the wall is stationary.
      */
-    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3& vel, const Scalar3& pos) const { }
+    HOSTDEVICE void addToVirtualParticleVelocity(Scalar3 HOOMD_THREAD& vel, const Scalar3 HOOMD_CREF pos) const { }
 
     //! Get pore half width
     /*!

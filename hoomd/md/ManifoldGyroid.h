@@ -7,7 +7,7 @@
 #include "hoomd/BoxDim.h"
 #include "hoomd/HOOMDMath.h"
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
 #include <pybind11/pybind11.h>
 #endif
 
@@ -50,6 +50,9 @@ namespace md
 class ManifoldGyroid
     {
     public:
+    //! Default constructor (for kernel argument structs)
+    DEVICE ManifoldGyroid() = default;
+
     //! Constructs the manifold class
     /* \param _N vector determining the number of unitcells in x-, y-, and z-direction
        \param _epsilon Defines the specific constant mean curvture companion
@@ -65,7 +68,7 @@ class ManifoldGyroid
         \return result of the nodal function at input point
     */
 
-    DEVICE Scalar implicitFunction(const Scalar3& point)
+    DEVICE Scalar implicitFunction(const Scalar3 HOOMD_CREF point)
         {
         Scalar cx, sx;
         fast::sincos(Lx * point.x, sx, cx);
@@ -82,7 +85,7 @@ class ManifoldGyroid
         \return normal of the Gyroid surface at input point
     */
 
-    DEVICE Scalar3 derivative(const Scalar3& point)
+    DEVICE Scalar3 derivative(const Scalar3 HOOMD_CREF point)
         {
         Scalar cx, sx;
         fast::sincos(Lx * point.x, sx, cx);
@@ -95,7 +98,7 @@ class ManifoldGyroid
                             Lz * (cz * cx - sy * sz));
         }
 
-    DEVICE bool fitsInsideBox(const BoxDim& box)
+    DEVICE bool fitsInsideBox(const BoxDim HOOMD_CREF box)
         {
         Scalar3 box_length = box.getHi() - box.getLo();
 
@@ -112,7 +115,7 @@ class ManifoldGyroid
         return 2;
         }
 
-#ifndef __HIPCC__
+#if !defined(__HIPCC__) && !defined(__METAL_VERSION__)
     pybind11::tuple getN()
         {
         return pybind11::make_tuple(Nx, Ny, Nz);

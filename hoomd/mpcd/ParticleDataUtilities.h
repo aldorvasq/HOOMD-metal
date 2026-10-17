@@ -24,7 +24,7 @@ namespace mpcd
 namespace detail
     {
 //! Sentinel value to signify that this particle is not placed in a cell
-const unsigned int NO_CELL = 0xffffffff;
+HOOMD_CONSTANT const unsigned int NO_CELL = 0xffffffff;
 
 #ifdef ENABLE_MPI
 //! Structure to store packed MPCD particle data

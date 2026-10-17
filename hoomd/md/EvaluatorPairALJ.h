@@ -45,7 +45,7 @@ namespace md
 using namespace detail;
 
 /*! Clip a value between 0 and 1 */
-HOSTDEVICE inline Scalar clip(const Scalar& x)
+HOSTDEVICE inline Scalar clip(const Scalar HOOMD_CREF x)
     {
     return (x >= 0) * (x + (x > 1) * (1 - x));
     }
@@ -66,11 +66,11 @@ HOSTDEVICE inline Scalar clip(const Scalar& x)
  * \param projection The closest point on the segment defined by e2-e1 to the input point (updated
  * by reference).
  */
-HOSTDEVICE inline void pointSegmentDistance(const vec3<Scalar>& point,
-                                            const vec3<Scalar>& e1,
-                                            const vec3<Scalar>& e2,
-                                            vec3<Scalar>& delta,
-                                            vec3<Scalar>& projection)
+HOSTDEVICE inline void pointSegmentDistance(const vec3<Scalar> HOOMD_CREF point,
+                                            const vec3<Scalar> HOOMD_CREF e1,
+                                            const vec3<Scalar> HOOMD_CREF e2,
+                                            vec3<Scalar> HOOMD_THREAD& delta,
+                                            vec3<Scalar> HOOMD_THREAD& projection)
     {
     vec3<Scalar> edge = e1 - e2;
     Scalar edge_length_sq = dot(edge, edge);
@@ -97,7 +97,7 @@ HOSTDEVICE inline void pointSegmentDistance(const vec3<Scalar>& point,
  * \param q The orientation quaternion to convert.
  * \param mat The output matrix (overwritten by reference).
  */
-HOSTDEVICE inline void quat2mat(const quat<Scalar>& q, Scalar (&mat)[3][3])
+HOSTDEVICE inline void quat2mat(const quat<Scalar> HOOMD_CREF q, Scalar HOOMD_THREAD (&mat)[3][3])
     {
     Scalar two_x = Scalar(2.0) * q.v.x;
     Scalar two_y = Scalar(2.0) * q.v.y;
@@ -157,9 +157,9 @@ template<unsigned int ndim> class EvaluatorPairALJ
         /*! \param ptr Pointer to load data to (will be incremented)
          *  \param available_bytes Size of remaining shared memory allocation
          */
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
 #ifndef __HIPCC__
         //! Shape constructor
@@ -402,14 +402,14 @@ template<unsigned int ndim> class EvaluatorPairALJ
         /*! \param ptr Pointer to load data to (will be incremented)
             \param available_bytes Size of remaining shared memory allocation
          */
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes)
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes)
             {
             verts.load_shared(ptr, available_bytes);
             faces.load_shared(ptr, available_bytes);
             face_offsets.load_shared(ptr, available_bytes);
             }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const
             {
             verts.allocate_shared(ptr, available_bytes);
             faces.allocate_shared(ptr, available_bytes);
@@ -441,11 +441,11 @@ template<unsigned int ndim> class EvaluatorPairALJ
         \param _q_j Quaternion of j^th particle.
         \param _params Per type pair parameters of this potential.
     */
-    HOSTDEVICE EvaluatorPairALJ(Scalar3& _dr,
-                                Scalar4& _qi,
-                                Scalar4& _qj,
+    HOSTDEVICE EvaluatorPairALJ(Scalar3 HOOMD_THREAD& _dr,
+                                Scalar4 HOOMD_THREAD& _qi,
+                                Scalar4 HOOMD_THREAD& _qj,
                                 Scalar _rcutsq,
-                                const param_type& _params)
+                                const param_type HOOMD_CREF _params)
         : dr(_dr), rcutsq(_rcutsq), qi(_qi), qj(_qj), _params(_params)
         {
         }
@@ -478,7 +478,7 @@ template<unsigned int ndim> class EvaluatorPairALJ
     /*! \param shape_i Shape of particle i
         \param shape_j Shape of particle j
     */
-    HOSTDEVICE void setShape(const shape_type* shapei, const shape_type* shapej)
+    HOSTDEVICE void setShape(const shape_type HOOMD_THREAD* shapei, const shape_type HOOMD_THREAD* shapej)
         {
         shape_i = shapei;
         shape_j = shapej;
@@ -510,11 +510,11 @@ template<unsigned int ndim> class EvaluatorPairALJ
        exterted on the j^th particle. \return True if they are evaluated or false if they are not
        because we are beyond the cutoff.
     */
-    HOSTDEVICE bool evaluate(Scalar3& force,
-                             Scalar& pair_eng,
+    HOSTDEVICE bool evaluate(Scalar3 HOOMD_THREAD& force,
+                             Scalar HOOMD_THREAD& pair_eng,
                              bool energy_shift,
-                             Scalar3& torque_i,
-                             Scalar3& torque_j)
+                             Scalar3 HOOMD_THREAD& torque_i,
+                             Scalar3 HOOMD_THREAD& torque_j)
         {
         Scalar rsq = dot(dr, dr);
 
@@ -544,10 +544,14 @@ template<unsigned int ndim> class EvaluatorPairALJ
                 // Create local scope to avoid polluting the local scope
                 // with many unnecessary variables after GJK is done.
                 bool flip = (tag_i >= tag_j);
-                const ManagedArray<vec3<Scalar>>& verts1(flip ? shape_j->verts : shape_i->verts);
-                const ManagedArray<vec3<Scalar>>& verts2(flip ? shape_i->verts : shape_j->verts);
-                const Scalar(&mat1)[3][3](flip ? matj : mati), (&mat2)[3][3](flip ? mati : matj);
-                const quat<Scalar>&q1(flip ? qj : qi), &q2(flip ? qi : qj);
+                const ManagedArray<vec3<Scalar>> HOOMD_THREAD& verts1(flip ? shape_j->verts
+                                                                           : shape_i->verts);
+                const ManagedArray<vec3<Scalar>> HOOMD_THREAD& verts2(flip ? shape_i->verts
+                                                                           : shape_j->verts);
+                const Scalar HOOMD_THREAD(&mat1)[3][3](flip ? matj : mati);
+                const Scalar HOOMD_THREAD(&mat2)[3][3](flip ? mati : matj);
+                const quat<Scalar> HOOMD_THREAD& q1(flip ? qj : qi);
+                const quat<Scalar> HOOMD_THREAD& q2(flip ? qi : qj);
                 vec3<Scalar> dr_use(flip ? -dr : dr);
 
                 bool success, overlap;
@@ -754,17 +758,17 @@ template<unsigned int ndim> class EvaluatorPairALJ
      * \param torque_j The current torque on particle j to which the torque computed in this method
      * is added.
      */
-    HOSTDEVICE inline void computeSimplexInteractions(const vec3<Scalar>& a,
-                                                      const vec3<Scalar>& b,
-                                                      const vec3<Scalar>& dr,
-                                                      const Scalar (&mati)[3][3],
-                                                      const Scalar (&matj)[3][3],
+    HOSTDEVICE inline void computeSimplexInteractions(const vec3<Scalar> HOOMD_CREF a,
+                                                      const vec3<Scalar> HOOMD_CREF b,
+                                                      const vec3<Scalar> HOOMD_CREF dr,
+                                                      const Scalar HOOMD_THREAD (&mati)[3][3],
+                                                      const Scalar HOOMD_THREAD (&matj)[3][3],
                                                       const Scalar contact_sphere_diameter_sq,
-                                                      const Scalar& four_epsilon,
-                                                      vec3<Scalar>& force,
-                                                      Scalar& pair_eng,
-                                                      Scalar3& torque_i,
-                                                      Scalar3& torque_j)
+                                                      const Scalar HOOMD_CREF four_epsilon,
+                                                      vec3<Scalar> HOOMD_THREAD& force,
+                                                      Scalar HOOMD_THREAD& pair_eng,
+                                                      Scalar3 HOOMD_THREAD& torque_i,
+                                                      Scalar3 HOOMD_THREAD& torque_j)
         {
         }
 
@@ -797,15 +801,15 @@ template<unsigned int ndim> class EvaluatorPairALJ
      * \param torque_j The current torque on particle j to which the torque computed in this method
      * is added.
      */
-    HOSTDEVICE inline void computeContactLJ(const Scalar& contact_sphere_diameter_sq,
-                                            const vec3<Scalar>& contact_vector,
-                                            const Scalar& four_epsilon,
-                                            const vec3<Scalar>& contact_point_i,
-                                            const vec3<Scalar>& contact_point_j,
-                                            vec3<Scalar>& force,
-                                            Scalar& pair_eng,
-                                            vec3<Scalar>& torque_i,
-                                            vec3<Scalar>& torque_j)
+    HOSTDEVICE inline void computeContactLJ(const Scalar HOOMD_CREF contact_sphere_diameter_sq,
+                                            const vec3<Scalar> HOOMD_CREF contact_vector,
+                                            const Scalar HOOMD_CREF four_epsilon,
+                                            const vec3<Scalar> HOOMD_CREF contact_point_i,
+                                            const vec3<Scalar> HOOMD_CREF contact_point_j,
+                                            vec3<Scalar> HOOMD_THREAD& force,
+                                            Scalar HOOMD_THREAD& pair_eng,
+                                            vec3<Scalar> HOOMD_THREAD& torque_i,
+                                            vec3<Scalar> HOOMD_THREAD& torque_j)
         {
         Scalar contact_distance_sq = dot(contact_vector, contact_vector);
         if ((_params.alpha / 2 != 0)
@@ -840,12 +844,12 @@ template<unsigned int ndim> class EvaluatorPairALJ
     quat<Scalar> qj;           //!< Orientation quaternion for particle j
     unsigned int tag_i;        //!< Tag of particle i.
     unsigned int tag_j;        //!< Tag of particle j.
-    const shape_type* shape_i; //!< Shape parameters of particle i.
-    const shape_type* shape_j; //!< Shape parameters of particle j.
-    const param_type& _params; //!< Potential parameters for the pair of interest.
+    const shape_type HOOMD_THREAD* shape_i; //!< Shape parameters of particle i.
+    const shape_type HOOMD_THREAD* shape_j; //!< Shape parameters of particle j.
+    const param_type HOOMD_CREF _params; //!< Potential parameters for the pair of interest.
 
-    constexpr static Scalar TWO_P_13 = 1.2599210498948732; // 2^(1/3)
-    constexpr static Scalar SHIFT_RHO_DIFF = -0.25;        // (1/(2^(1/6)))**12 - (1/(2^(1/6)))**6
+    constexpr static HOOMD_CONSTANT Scalar TWO_P_13 = 1.2599210498948732; // 2^(1/3)
+    constexpr static HOOMD_CONSTANT Scalar SHIFT_RHO_DIFF = -0.25;        // (1/(2^(1/6)))**12 - (1/(2^(1/6)))**6
     };
 
 //! Compute the distance between a point and the face of a polytope.
@@ -870,13 +874,13 @@ template<unsigned int ndim> class EvaluatorPairALJ
  * \param projection The closest point on the face to r0, IN THE FRAME OF PARTICLE j
  * (updated by reference).
  */
-HOSTDEVICE inline void pointFaceDistance(const vec3<Scalar>& rij,
-                                         const EvaluatorPairALJ<3>::shape_type* shape_j,
-                                         const vec3<Scalar>& r0,
-                                         const Scalar (&matj)[3][3],
+HOSTDEVICE inline void pointFaceDistance(const vec3<Scalar> HOOMD_CREF rij,
+                                         const EvaluatorPairALJ<3>::shape_type HOOMD_THREAD* shape_j,
+                                         const vec3<Scalar> HOOMD_CREF r0,
+                                         const Scalar HOOMD_THREAD (&matj)[3][3],
                                          unsigned int face_j,
-                                         vec3<Scalar>& delta,
-                                         vec3<Scalar>& projection)
+                                         vec3<Scalar> HOOMD_THREAD& delta,
+                                         vec3<Scalar> HOOMD_THREAD& projection)
     {
     // distsq will be used to hold the square distance from r0 to the
     // face of interest; work relative to particle j's center of mass
@@ -891,13 +895,13 @@ HOSTDEVICE inline void pointFaceDistance(const vec3<Scalar>& rij,
     unsigned int end_idx = (face_j == shape_j->face_offsets.size() - 1)
                                ? shape_j->faces.size()
                                : shape_j->face_offsets[face_j + 1];
-    const vec3<Scalar> vertex0(rotate(matj, shape_j->verts[shape_j->faces[start_idx]]));
+    const vec3<Scalar> vertex0 = rotate(matj, shape_j->verts[shape_j->faces[start_idx]]);
 
     // r0r0: vector from vertex0 to r0 relative to particle j
     const vec3<Scalar> r0r0(r0j - vertex0);
 
     // check distance for first edge of polygon
-    const vec3<Scalar> secondVertex(rotate(matj, shape_j->verts[shape_j->faces[start_idx + 1]]));
+    const vec3<Scalar> secondVertex = rotate(matj, shape_j->verts[shape_j->faces[start_idx + 1]]);
     const vec3<Scalar> rsec(secondVertex - vertex0);
     Scalar lambda(dot(r0r0, rsec) / dot(rsec, rsec));
     lambda = clip(lambda);
@@ -1008,12 +1012,12 @@ HOSTDEVICE inline void pointFaceDistance(const vec3<Scalar>& rij,
  * \param closestI The closest point to the first segment on the second segment
  * (overwritten by reference).
  */
-HOSTDEVICE inline void edgeEdgeDistance(const vec3<Scalar>& e00,
-                                        const vec3<Scalar>& e01,
-                                        const vec3<Scalar>& e10,
-                                        const vec3<Scalar>& e11,
-                                        vec3<Scalar>& closestI,
-                                        vec3<Scalar>& closestJ)
+HOSTDEVICE inline void edgeEdgeDistance(const vec3<Scalar> HOOMD_CREF e00,
+                                        const vec3<Scalar> HOOMD_CREF e01,
+                                        const vec3<Scalar> HOOMD_CREF e10,
+                                        const vec3<Scalar> HOOMD_CREF e11,
+                                        vec3<Scalar> HOOMD_THREAD& closestI,
+                                        vec3<Scalar> HOOMD_THREAD& closestJ)
     {
     // This math is identical to DEM's but is simplified to reduce the number
     // of dot products and clarify the purpose of the calculations that are
@@ -1115,10 +1119,10 @@ HOSTDEVICE inline void edgeEdgeDistance(const vec3<Scalar>& e00,
  * (overwritten by references).
  */
 template<unsigned int ndim>
-HOSTDEVICE inline void findSimplex(const vec3<Scalar>& vector,
-                                   const Scalar (&mat)[3][3],
-                                   vec3<Scalar> (&unique_vectors)[ndim],
-                                   const typename EvaluatorPairALJ<ndim>::shape_type* shape)
+HOSTDEVICE inline void findSimplex(const vec3<Scalar> HOOMD_CREF vector,
+                                   const Scalar HOOMD_THREAD (&mat)[3][3],
+                                   vec3<Scalar> HOOMD_THREAD (&unique_vectors)[ndim],
+                                   const typename EvaluatorPairALJ<ndim>::shape_type HOOMD_THREAD* shape)
     {
     if (ndim == 3)
         {
@@ -1299,10 +1303,10 @@ HOSTDEVICE inline void findSimplex(const vec3<Scalar>& vector,
  * \param shape The shape parameters of the particle being tested.
  */
 template<unsigned int ndim>
-HOSTDEVICE inline void findFace(const vec3<Scalar>& vector,
-                                const Scalar (&mat)[3][3],
-                                unsigned int& face,
-                                const typename EvaluatorPairALJ<ndim>::shape_type* shape)
+HOSTDEVICE inline void findFace(const vec3<Scalar> HOOMD_CREF vector,
+                                const Scalar HOOMD_THREAD (&mat)[3][3],
+                                unsigned int HOOMD_THREAD& face,
+                                const typename EvaluatorPairALJ<ndim>::shape_type HOOMD_THREAD* shape)
     {
     if (ndim == 3)
         {
@@ -1448,17 +1452,17 @@ HOSTDEVICE inline void findFace(const vec3<Scalar>& vector,
 
 template<>
 HOSTDEVICE inline void
-EvaluatorPairALJ<2>::computeSimplexInteractions(const vec3<Scalar>& a,
-                                                const vec3<Scalar>& b,
-                                                const vec3<Scalar>& dr,
-                                                const Scalar (&mati)[3][3],
-                                                const Scalar (&matj)[3][3],
+EvaluatorPairALJ<2>::computeSimplexInteractions(const vec3<Scalar> HOOMD_CREF a,
+                                                const vec3<Scalar> HOOMD_CREF b,
+                                                const vec3<Scalar> HOOMD_CREF dr,
+                                                const Scalar HOOMD_THREAD (&mati)[3][3],
+                                                const Scalar HOOMD_THREAD (&matj)[3][3],
                                                 const Scalar contact_sphere_diameter_sq,
-                                                const Scalar& four_epsilon,
-                                                vec3<Scalar>& force,
-                                                Scalar& pair_eng,
-                                                Scalar3& torque_i,
-                                                Scalar3& torque_j)
+                                                const Scalar HOOMD_CREF four_epsilon,
+                                                vec3<Scalar> HOOMD_THREAD& force,
+                                                Scalar HOOMD_THREAD& pair_eng,
+                                                Scalar3 HOOMD_THREAD& torque_i,
+                                                Scalar3 HOOMD_THREAD& torque_j)
     {
     vec3<Scalar> support_vectors1[2], support_vectors2[2];
     findSimplex(b, mati, support_vectors1, shape_i);
@@ -1518,17 +1522,17 @@ EvaluatorPairALJ<2>::computeSimplexInteractions(const vec3<Scalar>& a,
 
 template<>
 HOSTDEVICE inline void
-EvaluatorPairALJ<3>::computeSimplexInteractions(const vec3<Scalar>& a,
-                                                const vec3<Scalar>& b,
-                                                const vec3<Scalar>& dr,
-                                                const Scalar (&mati)[3][3],
-                                                const Scalar (&matj)[3][3],
+EvaluatorPairALJ<3>::computeSimplexInteractions(const vec3<Scalar> HOOMD_CREF a,
+                                                const vec3<Scalar> HOOMD_CREF b,
+                                                const vec3<Scalar> HOOMD_CREF dr,
+                                                const Scalar HOOMD_THREAD (&mati)[3][3],
+                                                const Scalar HOOMD_THREAD (&matj)[3][3],
                                                 const Scalar contact_sphere_diameter_sq,
-                                                const Scalar& four_epsilon,
-                                                vec3<Scalar>& force,
-                                                Scalar& pair_eng,
-                                                Scalar3& torque_i,
-                                                Scalar3& torque_j)
+                                                const Scalar HOOMD_CREF four_epsilon,
+                                                vec3<Scalar> HOOMD_THREAD& force,
+                                                Scalar HOOMD_THREAD& pair_eng,
+                                                Scalar3 HOOMD_THREAD& torque_i,
+                                                Scalar3 HOOMD_THREAD& torque_j)
     {
     unsigned int face_i, face_j;
     findFace<3>(b, mati, face_i, shape_i);
@@ -1545,14 +1549,14 @@ EvaluatorPairALJ<3>::computeSimplexInteractions(const vec3<Scalar>& a,
     // Compute the interaction of the verts on 1 to the face on 2.
     for (unsigned int i = start_idx_i; i < end_idx_i; ++i)
         {
-        const vec3<Scalar> vertex(rotate(mati, shape_i->verts[shape_i->faces[i]]));
-        pointFaceDistance(rij, shape_j, vertex, matj, face_j, vec, projection);
+        const vec3<Scalar> vert = rotate(mati, shape_i->verts[shape_i->faces[i]]);
+        pointFaceDistance(rij, shape_j, vert, matj, face_j, vec, projection);
 
         computeContactLJ(contact_sphere_diameter_sq,
                          -vec,
                          four_epsilon,
-                         vertex,
-                         dr + vertex - vec,
+                         vert,
+                         dr + vert - vec,
                          force,
                          pair_eng,
                          torquei,
@@ -1566,13 +1570,13 @@ EvaluatorPairALJ<3>::computeSimplexInteractions(const vec3<Scalar>& a,
     // Compute the interaction of the verts on 2 to the edge on 1.
     for (unsigned int i = start_idx_j; i < end_idx_j; ++i)
         {
-        const vec3<Scalar> vertex(rotate(matj, shape_j->verts[shape_j->faces[i]]));
-        pointFaceDistance(dr, shape_i, vertex, mati, face_i, vec, projection);
+        const vec3<Scalar> vert = rotate(matj, shape_j->verts[shape_j->faces[i]]);
+        pointFaceDistance(dr, shape_i, vert, mati, face_i, vec, projection);
         computeContactLJ(contact_sphere_diameter_sq,
                          vec,
                          four_epsilon,
                          projection,
-                         dr + vertex,
+                         dr + vert,
                          force,
                          pair_eng,
                          torquei,

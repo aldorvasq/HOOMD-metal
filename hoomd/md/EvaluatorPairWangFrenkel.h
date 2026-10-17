@@ -52,9 +52,9 @@ class EvaluatorPairWangFrenkel
         int mu;
         int nu;
 
-        DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
+        DEVICE void load_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) { }
 
-        HOSTDEVICE void allocate_shared(char*& ptr, unsigned int& available_bytes) const { }
+        HOSTDEVICE void allocate_shared(char HOOMD_SHARED* HOOMD_THREAD& ptr, unsigned int HOOMD_THREAD& available_bytes) const { }
 
 #ifdef ENABLE_HIP
         // set CUDA memory hints
@@ -91,7 +91,7 @@ class EvaluatorPairWangFrenkel
             pybind11::dict v;
             v["mu"] = mu;
             v["nu"] = nu;
-            Scalar sigma = fast::pow(sigma_pow_2m, 1.0 / (2.0 * Scalar(mu)));
+            Scalar sigma = fast::pow(sigma_pow_2m, Scalar(1.0) / (Scalar(2.0) * Scalar(mu)));
             v["sigma"] = sigma;
             Scalar sigma_sq = sigma * sigma;
             v["R"] = fast::pow(R_pow_2m, 1 / Scalar(2 * mu));
@@ -111,7 +111,7 @@ class EvaluatorPairWangFrenkel
         \param _rcutsq Squared distance at which the potential goes to 0
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorPairWangFrenkel(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+    DEVICE EvaluatorPairWangFrenkel(Scalar _rsq, Scalar _rcutsq, const param_type HOOMD_CREF _params)
         : rsq(_rsq), rcutsq(_rcutsq), prefactor(_params.prefactor),
           sigma_pow_2m(_params.sigma_pow_2m), R_pow_2m(_params.R_pow_2m), mu(_params.mu),
           nu(_params.nu)
@@ -138,7 +138,7 @@ class EvaluatorPairWangFrenkel
 
         \return True if they are evaluated or false if they are not because we are beyond the cutoff
     */
-    DEVICE bool evalForceAndEnergy(Scalar& force_divr, Scalar& pair_eng, bool energy_shift)
+    DEVICE bool evalForceAndEnergy(Scalar HOOMD_THREAD& force_divr, Scalar HOOMD_THREAD& pair_eng, bool energy_shift)
         {
         // compute the force divided by r in force_divr
         if (rsq < rcutsq && prefactor != 0)

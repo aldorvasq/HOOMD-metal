@@ -14,7 +14,11 @@
 
 #include "HOOMDMath.h"
 
+#ifdef __METAL_VERSION__
+#include "hoomd/mtl/Philox.h"
+#else
 #include <hoomd/extern/OpenRAND/include/openrand/philox.h>
+#endif
 
 #include <limits>
 #include <type_traits>
@@ -136,7 +140,7 @@ class Seed
         }
 
     /// Get the key
-    DEVICE const uint64_t& getKey() const
+    DEVICE const uint64_t HOOMD_THREAD& getKey() const
         {
         return m_key;
         }
@@ -159,11 +163,13 @@ class Counter
     */
     DEVICE Counter(uint32_t _a = 0, uint32_t _b = 0, uint32_t _c = 0) : a(_a), b(_b), c(_c) { }
 
+#ifndef __METAL_VERSION__
     /// Get the counter
     DEVICE std::array<uint32_t, 4> getCounter() const
         {
         return {0, c, b, a};
         }
+#endif
 
     const uint32_t a, b, c;
     };
@@ -201,28 +207,36 @@ class RandomGenerator
         @param seed RNG seed.
         @param counter Initial value of the RNG counter.
     */
-    DEVICE inline RandomGenerator(const Seed& seed, const Counter& counter);
+    DEVICE inline RandomGenerator(const Seed HOOMD_CREF seed, const Counter HOOMD_CREF counter);
 
     //! Generate a uniform random uint32_t
     DEVICE inline uint32_t generate_u32()
         {
+#ifdef __METAL_VERSION__
+        return rng.rand_u32();
+#else
         return rng.rand<uint32_t>();
+#endif
         }
 
     //! Generate a uniform random uint64_t
     DEVICE inline uint64_t generate_u64()
         {
+#ifdef __METAL_VERSION__
+        return rng.rand_u64();
+#else
         return rng.rand<uint64_t>();
+#endif
         }
 
     //! Generate two uniform random uint64_t
     /*! \param out1 [out] A random uniform 64-bit unsigned integer.
         \param out2 [out] A random uniform 64-bit unsigned integer.
      */
-    DEVICE inline void generate_2u64(uint64_t& out1, uint64_t& out2)
+    DEVICE inline void generate_2u64(uint64_t HOOMD_THREAD& out1, uint64_t HOOMD_THREAD& out2)
         {
-        out1 = rng.rand<uint64_t>();
-        out2 = rng.rand<uint64_t>();
+        out1 = generate_u64();
+        out2 = generate_u64();
         }
 
     template<class Real> DEVICE inline Real generate_canonical()
@@ -232,10 +246,14 @@ class RandomGenerator
 
     private:
     /// The random number generator
+#ifdef __METAL_VERSION__
+    mtl::Philox rng;
+#else
     openrand::Philox rng;
+#endif
     };
 
-DEVICE inline RandomGenerator::RandomGenerator(const Seed& seed, const Counter& counter)
+DEVICE inline RandomGenerator::RandomGenerator(const Seed HOOMD_CREF seed, const Counter HOOMD_CREF counter)
     : rng(seed.getKey(), counter.a, counter.b, counter.c)
     {
     }
@@ -248,7 +266,7 @@ namespace detail
 
     \post The state of the generator is advanced one step.
  */
-template<class Real> DEVICE inline Real generate_canonical(RandomGenerator& rng)
+template<class Real> DEVICE inline Real generate_canonical(RandomGenerator HOOMD_THREAD& rng)
     {
     return rng.generate_canonical<Real>();
     }
@@ -276,7 +294,7 @@ template<typename Real> class UniformDistribution
     /*! \param rng Random number generator
         \returns uniform random value in [a,b]
     */
-    template<typename RNG> DEVICE inline Real operator()(RNG& rng)
+    template<typename RNG> DEVICE inline Real operator()(RNG HOOMD_THREAD& rng)
         {
         return a + width * detail::generate_canonical<Real>(rng);
         }
@@ -305,7 +323,7 @@ template<typename Real> class NormalDistribution
     /*! \param rng Random number generator
         \returns normally distributed random value in with standard deviation *sigma* and mean *mu*.
     */
-    template<typename RNG> DEVICE inline Real operator()(RNG& rng)
+    template<typename RNG> DEVICE inline Real operator()(RNG HOOMD_THREAD& rng)
         {
         uint64_t u0, u1;
         rng.generate_2u64(u0, u1);
@@ -325,7 +343,7 @@ template<typename Real> class NormalDistribution
         \param rng Random number generator
         \returns normally distributed random value in with standard deviation *sigma* and mean *mu*.
     */
-    template<typename RNG> DEVICE inline void operator()(Real& out1, Real& out2, RNG& rng)
+    template<typename RNG> DEVICE inline void operator()(Real HOOMD_THREAD& out1, Real HOOMD_THREAD& out2, RNG HOOMD_THREAD& rng)
         {
         uint64_t u0, u1;
         rng.generate_2u64(u0, u1);
@@ -353,7 +371,7 @@ template<typename Real> class SpherePointGenerator
     public:
     DEVICE explicit SpherePointGenerator() { }
 
-    template<typename RNG, typename Real3> DEVICE inline void operator()(RNG& rng, Real3& point)
+    template<typename RNG, typename Real3> DEVICE inline void operator()(RNG HOOMD_THREAD& rng, Real3 HOOMD_THREAD& point)
         {
         // draw a random angle
         const Real theta = UniformDistribution<Real>(Real(0), Real(2.0 * M_PI))(rng);
@@ -369,7 +387,10 @@ template<typename Real> class SpherePointGenerator
 
         // project onto the sphere surface
         const Real sqrtu = fast::sqrt(one_minus_u2);
-        fast::sincos(theta, (Real&)point.y, (Real&)point.x);
+        Real sin_theta, cos_theta;
+        fast::sincos(theta, sin_theta, cos_theta);
+        point.x = cos_theta;
+        point.y = sin_theta;
         point.x *= sqrtu;
         point.y *= sqrtu;
         point.z = u;
@@ -419,7 +440,7 @@ template<typename Real> class GammaDistribution
      *
      * The squeeze test is performed to bypass some transcendental calls.
      */
-    template<typename RNG> DEVICE inline Real operator()(RNG& rng)
+    template<typename RNG> DEVICE inline Real operator()(RNG HOOMD_THREAD& rng)
         {
         if (m_alpha <= 0)
             {
@@ -500,7 +521,7 @@ class UniformIntDistribution
        the range [0 ... max2) using 32-but random values and a bitwise and with max2-1. Return the
        first random number found in the range.
     */
-    template<typename RNG> DEVICE inline uint32_t operator()(RNG& rng)
+    template<typename RNG> DEVICE inline uint32_t operator()(RNG HOOMD_THREAD& rng)
         {
         // handle degenerate case where m==0
         if (m == 0)
@@ -547,7 +568,7 @@ template<class Real> class PoissonDistribution
     /*! \param rng Random number generator
         \returns normally Poisson distributed random number with mean *mean*.
     */
-    template<typename RNG> DEVICE inline int operator()(RNG& rng)
+    template<typename RNG> DEVICE inline int operator()(RNG HOOMD_THREAD& rng)
         {
         // the value 13 is determined by empirical performance testing
         if (mean < 13)
@@ -581,7 +602,7 @@ template<class Real> class PoissonDistribution
                + Real(1) / (Real(1188) * xx9) - Real(691) / (Real(360360) * xx11);
         }
 
-    template<typename RNG> DEVICE int poissrnd_small(RNG& rng)
+    template<typename RNG> DEVICE int poissrnd_small(RNG HOOMD_THREAD& rng)
         {
         Real L = fast::exp(-mean);
         Real p = 1;
@@ -595,7 +616,7 @@ template<class Real> class PoissonDistribution
         return result;
         }
 
-    template<typename RNG> DEVICE int poissrnd_large(RNG& rng)
+    template<typename RNG> DEVICE int poissrnd_large(RNG HOOMD_THREAD& rng)
         {
         Real r;
         Real x, m;

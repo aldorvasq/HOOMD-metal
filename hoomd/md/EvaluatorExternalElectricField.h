@@ -68,7 +68,7 @@ class EvaluatorExternalElectricField
 #endif // ifndef __HIPCC__
         } __attribute__((aligned(16)));
 
-    typedef void* field_type;
+    typedef HOOMD_GLOBAL void* field_type;
 
     //! Constructs the constraint evaluator
     /*! \param X position of particle
@@ -77,9 +77,9 @@ class EvaluatorExternalElectricField
     */
     DEVICE EvaluatorExternalElectricField(Scalar3 X,
                                           quat<Scalar> q,
-                                          const BoxDim& box,
-                                          const param_type& params,
-                                          const field_type& field)
+                                          const BoxDim HOOMD_CREF box,
+                                          const param_type HOOMD_CREF params,
+                                          const field_type HOOMD_CREF field)
         : m_pos(X), m_box(box), m_E(params.E)
         {
         }
@@ -113,7 +113,7 @@ class EvaluatorExternalElectricField
         \param virial array of six scalars for the upper triangular virial tensor
     */
     DEVICE void
-    evalForceTorqueEnergyAndVirial(Scalar3& F, Scalar3& T, Scalar& energy, Scalar* virial)
+    evalForceTorqueEnergyAndVirial(Scalar3 HOOMD_THREAD& F, Scalar3 HOOMD_THREAD& T, Scalar HOOMD_THREAD& energy, Scalar HOOMD_THREAD* virial)
         {
         F = m_qi * m_E;
         energy = -m_qi * dot(m_E, m_pos);

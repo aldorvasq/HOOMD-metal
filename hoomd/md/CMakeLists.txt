@@ -358,9 +358,11 @@ set(_md_cu_sources ActiveForceComputeGPU.cu
                       CosineSqAngleForceGPU.cu
                       )
 
+set(_md_metal_sources "")
 if (ENABLE_HIP)
 set(_cuda_sources ${_md_cu_sources} ${DFFT_CU_SOURCES})
 set_source_files_properties(${_md_cu_sources} PROPERTIES LANGUAGE ${HOOMD_DEVICE_LANGUAGE})
+hoomd_metal_ported_sources(_md_metal_sources ${_md_cu_sources})
 endif (ENABLE_HIP)
 
 # generate pybind11 export cc files
@@ -394,9 +396,11 @@ foreach(_manifold ${_manifolds})
         configure_file(ActiveForceConstraintComputeGPU.cu.inc
                        ActiveForceConstraintCompute${_manifold}GPU.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(ActiveForceConstraintComputeGPU ActiveForceConstraintCompute${_manifold}GPU _md_metal_sources)
         configure_file(TwoStepRATTLEGPU.cu.inc
                        TwoStepRATTLE${_manifold}GPU.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(TwoStepRATTLEGPU TwoStepRATTLE${_manifold}GPU _md_metal_sources)
         set(_md_sources ${_md_sources} export_ActiveForceConstraintCompute${_manifold}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             ActiveForceConstraintCompute${_manifold}GPU.cu
@@ -438,6 +442,7 @@ foreach(_bond ${_bonds})
         configure_file(PotentialBondGPUKernel.cu.inc
                        PotentialBond${_bond}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialBondGPUKernel PotentialBond${_bond}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialBond${_bond}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialBond${_bond}GPUKernel.cu
@@ -459,6 +464,7 @@ foreach(_bond ${_bonds})
         configure_file(PotentialMeshBondGPUKernel.cu.inc
                        PotentialMeshBond${_bond}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialMeshBondGPUKernel PotentialMeshBond${_bond}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialMeshBond${_bond}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialMeshBond${_bond}GPUKernel.cu
@@ -482,6 +488,7 @@ foreach(_pair ${_pairs})
         configure_file(PotentialSpecialPairGPUKernel.cu.inc
                        PotentialSpecialPair${_pair}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialSpecialPairGPUKernel PotentialSpecialPair${_pair}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialSpecialPair${_pair}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialSpecialPair${_pair}GPUKernel.cu
@@ -505,6 +512,7 @@ foreach(_evaluator ${_triplets})
         configure_file(PotentialTersoffGPUKernel.cu.inc
                        PotentialTersoff${_evaluator}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialTersoffGPUKernel PotentialTersoff${_evaluator}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialTersoff${_evaluator}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialTersoff${_evaluator}GPUKernel.cu
@@ -528,6 +536,7 @@ foreach(_evaluator ${_external_evaluators})
         configure_file(PotentialExternalGPUKernel.cu.inc
                        PotentialExternal${_evaluator}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialExternalGPUKernel PotentialExternal${_evaluator}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialExternal${_evaluator}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialExternal${_evaluator}GPUKernel.cu
@@ -551,6 +560,7 @@ foreach(_evaluator ${_wall_evaluators})
         configure_file(PotentialExternalWallGPUKernel.cu.inc
                        PotentialExternalWall${_evaluator}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialExternalWallGPUKernel PotentialExternalWall${_evaluator}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialExternalWall${_evaluator}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialExternalWall${_evaluator}GPUKernel.cu
@@ -574,6 +584,7 @@ foreach(_evaluator ${_dpdthermo_evaluators})
         configure_file(PotentialPairDPDThermoGPUKernel.cu.inc
                        PotentialPairDPDThermo${_evaluator}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialPairDPDThermoGPUKernel PotentialPairDPDThermo${_evaluator}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialPairDPDThermo${_evaluator}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialPairDPDThermo${_evaluator}GPUKernel.cu
@@ -627,6 +638,7 @@ foreach(_evaluator ${_pair_evaluators})
         configure_file(PotentialPairGPUKernel.cu.inc
                        PotentialPair${_evaluator}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(PotentialPairGPUKernel PotentialPair${_evaluator}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_PotentialPair${_evaluator}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             PotentialPair${_evaluator}GPUKernel.cu
@@ -656,6 +668,7 @@ foreach(_evaluator ${_patchy_evaluators})
         configure_file(AnisoPotentialPairPatchyGPUKernel.cu.inc
                        AnisoPotentialPairPatchy${_evaluator}GPUKernel.cu
                        @ONLY)
+        hoomd_metal_configure_kernel(AnisoPotentialPairPatchyGPUKernel AnisoPotentialPairPatchy${_evaluator}GPUKernel _md_metal_sources)
         set(_md_sources ${_md_sources} export_AnisoPotentialPairPatchy${_evaluator}GPU.cc)
         set(_cuda_sources ${_cuda_sources}
             AnisoPotentialPairPatchy${_evaluator}GPUKernel.cu)
@@ -671,6 +684,12 @@ foreach(_evaluator ${_alchemical_pair_evaluators})
                    @ONLY)
     set(_md_sources ${_md_sources} export_PotentialPairAlchemical${_evaluator}.cc)
 endforeach()
+
+if (ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
+    # Metal kernels replace the .cu files
+    set(_cuda_sources "")
+    list(FILTER _md_sources EXCLUDE REGEX "\\.cu$")
+endif()
 
 hoomd_add_module(_md SHARED ${_md_sources} ${_cuda_sources} ${DFFT_SOURCES} ${_md_headers} NO_EXTRAS)
 # alias into the HOOMD namespace so that plugins and symlinked components both work
@@ -691,6 +710,10 @@ else()
 endif()
 if (ENABLE_HIP)
     target_link_libraries(_md PRIVATE neighbor)
+endif()
+if (ENABLE_HIP AND HIP_PLATFORM STREQUAL "metal")
+    hoomd_add_metal_sources(_md ${_md_metal_sources})
+    hoomd_metal_unported_stubs(_md _hoomd)
 endif()
 
 # install the library
