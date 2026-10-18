@@ -9,6 +9,7 @@ authors:
     given-names: Aldo
 version: 0.1.2
 date-released: "2026-10-18"
+doi: 10.5281/zenodo.23457466
 repository-code: "https://github.com/aldorvasq/HOOMD-metal"
 license:
   - BSD-3-Clause

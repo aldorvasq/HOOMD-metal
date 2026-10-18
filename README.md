@@ -13,6 +13,7 @@
   <img alt="Platform: macOS 15+ on Apple silicon" src="https://img.shields.io/badge/platform-macOS%2015%2B%20%7C%20Apple%20silicon-67727f">
   <img alt="GPU: Metal" src="https://img.shields.io/badge/GPU-Metal-67727f">
   <a href="https://github.com/glotzerlab/hoomd-blue"><img alt="Based on HOOMD-blue 7.2" src="https://img.shields.io/badge/based%20on-HOOMD--blue%207.2-5187b2"></a>
+  <a href="https://doi.org/10.5281/zenodo.23457466"><img alt="DOI 10.5281/zenodo.23457466" src="https://zenodo.org/badge/DOI/10.5281/zenodo.23457466.svg"></a>
   <a href="#license"><img alt="License: BSD-3-Clause and MIT" src="https://img.shields.io/badge/license-BSD--3--Clause%20%2B%20MIT-959fab"></a>
 </p>
 
@@ -133,8 +134,14 @@ If you use HOOMD-metal in published work, please cite HOOMD-blue:
 > *Computational Materials Science* 173: 109363, Feb 2020.
 > [10.1016/j.commatsci.2019.109363](https://doi.org/10.1016/j.commatsci.2019.109363)
 
-and HOOMD-metal itself (GitHub's "Cite this repository" button gives the reference, from
-[CITATION.cff](CITATION.cff)).
+and HOOMD-metal itself:
+
+> A. Vasquez-Briceno. HOOMD-metal: HOOMD-blue molecular dynamics on Apple silicon GPUs. Zenodo.
+> [10.5281/zenodo.23457466](https://doi.org/10.5281/zenodo.23457466)
+
+This DOI always points to the latest release; each release also has its own DOI on
+[Zenodo](https://doi.org/10.5281/zenodo.23457466). GitHub's "Cite this repository" button gives
+the same reference in other formats.
 
 ## Documentation and help
 
