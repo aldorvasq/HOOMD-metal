@@ -1,0 +1,32 @@
+{
+    "title": "HOOMD-metal: HOOMD-blue molecular dynamics on Apple silicon GPUs",
+    "upload_type": "software",
+    "description": "<p>HOOMD-metal adds a Metal GPU backend to HOOMD-blue so that HOOMD-blue molecular dynamics simulations run on the GPU of Apple silicon Macs with unchanged Python scripts. HOOMD-metal is an independent project, not developed or endorsed by the HOOMD-blue team. HOOMD-blue's code remains under the BSD 3-Clause License; the new HOOMD-metal code is also available under the MIT License (see LICENSE-MIT).</p><p>If you use HOOMD-metal in published work, please also cite HOOMD-blue: J. A. Anderson, J. Glaser, and S. C. Glotzer, Computational Materials Science 173, 109363 (2020).</p>",
+    "creators": [
+        {
+            "name": "Vasquez-Briceno, Aldo"
+        }
+    ],
+    "license": "bsd-3-clause",
+    "keywords": [
+        "molecular dynamics",
+        "HOOMD-blue",
+        "GPU",
+        "Apple silicon",
+        "Metal",
+        "macOS",
+        "soft matter"
+    ],
+    "related_identifiers": [
+        {
+            "identifier": "https://github.com/glotzerlab/hoomd-blue",
+            "relation": "isDerivedFrom",
+            "scheme": "url"
+        },
+        {
+            "identifier": "10.1016/j.commatsci.2019.109363",
+            "relation": "references",
+            "scheme": "doi"
+        }
+    ]
+}
