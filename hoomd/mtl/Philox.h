@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Aldo Vasquez-Briceno.
+// Copyright (c) 2026 Aldo Vásquez-Briceño.
 // Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 // The Philox4x32-10 generator follows openrand::Philox from OpenRAND, Copyright (c) 2023,
 // Michigan State University, also released under the MIT License.

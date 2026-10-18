@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
-<!-- Copyright (c) 2026 Aldo Vasquez-Briceno. Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT). -->
+<!-- Copyright (c) 2026 Aldo Vásquez-Briceño. Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT). -->
 <text x="190" y="30" font-size="19" font-weight="600" fill="#6e7781">GPU speedup over one CPU core</text>
 <text x="190" y="52" font-size="13" fill="#8c959f">Apple M4 Mac mini, 10-core GPU. Bead-spring polymer melts and an LJ liquid.</text>
 <line x1="274.0" y1="64" x2="274.0" y2="292" stroke="#8c959f" stroke-opacity="0.3" stroke-width="1"/>

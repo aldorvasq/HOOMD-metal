@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Copyright (c) 2026 Aldo Vásquez-Briceño.
 # Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 
 # Build HOOMD-metal and install it into a conda environment (created when needed).

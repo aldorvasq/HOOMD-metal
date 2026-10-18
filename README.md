@@ -136,7 +136,7 @@ If you use HOOMD-metal in published work, please cite HOOMD-blue:
 
 and HOOMD-metal itself:
 
-> A. Vasquez-Briceno. HOOMD-metal: HOOMD-blue molecular dynamics on Apple silicon GPUs. Zenodo.
+> A. Vásquez-Briceño. HOOMD-metal: HOOMD-blue molecular dynamics on Apple silicon GPUs. Zenodo.
 > [10.5281/zenodo.23457466](https://doi.org/10.5281/zenodo.23457466)
 
 This DOI always points to the latest release; each release also has its own DOI on

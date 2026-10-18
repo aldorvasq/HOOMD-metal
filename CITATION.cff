@@ -5,8 +5,10 @@ message: >-
 title: "HOOMD-metal: HOOMD-blue molecular dynamics on Apple silicon GPUs"
 type: software
 authors:
-  - family-names: Vasquez-Briceno
+  - family-names: Vásquez-Briceño
     given-names: Aldo
+    affiliation: The University of Texas at San Antonio
+    orcid: "https://orcid.org/0009-0009-8190-9411"
 version: 0.1.2
 date-released: "2026-10-18"
 doi: 10.5281/zenodo.23457466

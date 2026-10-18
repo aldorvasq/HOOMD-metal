@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Copyright (c) 2026 Aldo Vásquez-Briceño.
 # Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 
 """RATTLE integrators (NVE, Langevin, Brownian, active Brownian) on seven manifolds.

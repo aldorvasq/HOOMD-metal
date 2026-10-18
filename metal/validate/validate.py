@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Copyright (c) 2026 Aldo Vásquez-Briceño.
 # Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 
 """Check that HOOMD-metal gives the same results on the GPU as on the CPU of this Mac.

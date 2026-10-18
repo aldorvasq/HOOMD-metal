@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Copyright (c) 2026 Aldo Vásquez-Briceño.
 # Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 
 """Convert a CUDA/HIP .cu file of simple kernels into a HOOMD-blue .metal file.

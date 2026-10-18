@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Copyright (c) 2026 Aldo Vásquez-Briceño.
 # Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 
 """Multiparticle collision dynamics: streaming, collisions, walls, fillers, sorting, and a
