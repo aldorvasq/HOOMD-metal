@@ -164,5 +164,4 @@ tools in `metal/`, and `CMake/hoomd/HOOMDMetalSetup.cmake`) is released under th
 
 HOOMD-metal is built entirely on [HOOMD-blue](https://glotzerlab.engin.umich.edu/hoomd-blue/),
 developed by the [Glotzer Group](https://glotzerlab.engin.umich.edu/) at the University of
-Michigan and its contributors. The HOOMD-metal logo is the HOOMD-blue logo in silver, with the
-letter t from the [hoomd-rs](https://github.com/glotzerlab/hoomd-rs) logo.
+Michigan and its contributors.
