@@ -127,7 +127,10 @@ def main():
     if args.sustain:
         sizes = sizes[:1]
 
-    print(f"\n{'particles':>10s} {'steps/s':>10s} {'M particle-steps/s':>19s}")
+    if args.sustain:
+        print(f"\nRunning {args.sustain:g} minutes:")
+    else:
+        print(f"\n{'particles':>10s} {'steps/s':>10s} {'M particle-steps/s':>19s}")
     for n_target in sizes:
         sim = hoomd.Simulation(device=device, seed=3)
         N = build(sim, n_target)
