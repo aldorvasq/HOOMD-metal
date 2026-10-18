@@ -25,6 +25,8 @@ std::string BuildInfo::getCompileFlags()
     o << "CUDA";
 #elif defined(__HIP_PLATFORM_HCC__)
     o << "ROCm";
+#elif defined(__HIP_PLATFORM_METAL__)
+    o << "Metal";
 #endif
     o << "] (" << hip_major << "." << hip_minor << ") ";
 #endif
@@ -109,6 +111,8 @@ std::string BuildInfo::getGPUPlatform()
     return std::string("CUDA");
 #elif defined(__HIP_PLATFORM_HCC__)
     return std::string("ROCm");
+#elif defined(__HIP_PLATFORM_METAL__)
+    return std::string("Metal");
 #else
     return "";
 #endif

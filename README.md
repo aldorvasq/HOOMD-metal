@@ -1,3 +1,21 @@
+# HOOMD-metal
+
+**HOOMD-metal** is HOOMD-blue with a GPU backend for Apple silicon Macs (M1 or newer, macOS 15 or
+newer). HOOMD-blue scripts run unchanged on the Mac's GPU with `hoomd.device.GPU()`. This is an
+unofficial fork, not supported by the HOOMD-blue developers.
+
+```bash
+git clone --recursive https://github.com/aldorvasq/HOOMD-metal.git
+cd HOOMD-metal
+metal/install.sh --validate    # conda env "hoomd-metal": build, install, check GPU vs CPU
+conda activate hoomd-metal
+```
+
+Requirements, validation, performance, and limitations: [metal/README.md](metal/README.md).
+The upstream HOOMD-blue README follows.
+
+---
+
 [![HOOMD-blue](sphinx-doc/hoomdblue-logo-horizontal.svg)](https://glotzerlab.engin.umich.edu/hoomd-blue/)
 
 [![Citing HOOMD](https://img.shields.io/badge/cite-hoomd-blue.svg)](https://hoomd-blue.readthedocs.io/en/latest/citing.html)

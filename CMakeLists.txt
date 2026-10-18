@@ -6,6 +6,18 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.15...3.27 FATAL_ERROR)
 # This allows FindPython to find virtual environment Pythons before a homebrew or system Pythons.
 set(CMAKE_FIND_FRAMEWORK LAST)
 
+# The Metal backend uses macOS 15 APIs (MSL 3.2, residency sets). Target macOS 15 rather than the
+# build machine's version so that a build also runs on other Macs. This must precede project().
+if (ENABLE_GPU AND HOOMD_GPU_PLATFORM STREQUAL "Metal")
+    set(_hoomd_macos_target "$ENV{MACOSX_DEPLOYMENT_TARGET}")
+    if (CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(_hoomd_macos_target "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    endif()
+    if (NOT _hoomd_macos_target OR _hoomd_macos_target VERSION_LESS 15.0)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0" CACHE STRING "Minimum macOS version to target." FORCE)
+    endif()
+endif()
+
 project (HOOMD LANGUAGES C CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -106,6 +118,20 @@ SET_PROPERTY(CACHE HOOMD_GPU_PLATFORM PROPERTY STRINGS "CUDA" "HIP" "Metal")
 if (ENABLE_GPU AND HOOMD_GPU_PLATFORM STREQUAL "Metal")
     if (NOT APPLE)
         message(FATAL_ERROR "HOOMD_GPU_PLATFORM=Metal requires macOS.")
+    endif()
+    # Only Apple silicon GPUs are supported, and HOOMD's Python module must match the arm64
+    # Python that loads it
+    if (CMAKE_OSX_ARCHITECTURES)
+        set(_hoomd_target_arch "${CMAKE_OSX_ARCHITECTURES}")
+    else()
+        set(_hoomd_target_arch "${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+    if (NOT _hoomd_target_arch STREQUAL "arm64")
+        message(FATAL_ERROR "HOOMD_GPU_PLATFORM=Metal requires an arm64 (Apple silicon) build, "
+                            "but the target architecture is '${_hoomd_target_arch}'. On an Apple "
+                            "silicon Mac this means CMake or conda runs under Rosetta: install an "
+                            "arm64 (osx-arm64) conda such as Miniforge. Intel Macs must build "
+                            "with ENABLE_GPU=OFF.")
     endif()
     # Apple GPUs have no double precision arithmetic
     if (NOT HOOMD_LONGREAL_SIZE STREQUAL "32" OR NOT HOOMD_SHORTREAL_SIZE STREQUAL "32")

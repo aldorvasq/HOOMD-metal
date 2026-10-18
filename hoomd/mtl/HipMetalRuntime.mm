@@ -238,6 +238,12 @@ class Runtime
         return m_device != nil;
         }
 
+    //! Why the GPU is not available (empty when it is)
+    const std::string& unavailable_reason() const
+        {
+        return m_unavailable_reason;
+        }
+
     id<MTLDevice> device() const
         {
         return m_device;
@@ -913,7 +919,23 @@ class Runtime
             {
             m_device = MTLCreateSystemDefaultDevice();
             if (!m_device)
+                {
+                m_unavailable_reason = "Metal reports no GPU on this computer.";
                 return;
+                }
+
+            // The kernels use Apple silicon features (GPU family Apple7: M1 or newer). Intel Macs
+            // with AMD or Intel GPUs must use the CPU device.
+            m_gpu_family = query_gpu_family(m_device);
+            if (m_gpu_family < 7)
+                {
+                m_unavailable_reason = std::string("The GPU \"") + m_device.name.UTF8String
+                                       + "\" is not supported. The Metal backend requires an "
+                                         "Apple silicon GPU (M1 or newer). Use "
+                                         "hoomd.device.CPU() on this computer.";
+                m_device = nil;
+                return;
+                }
 
             m_queue = [m_device newCommandQueue];
             m_fence = [m_device newFence];
@@ -926,9 +948,9 @@ class Runtime
             m_residency = [m_device newResidencySetWithDescriptor:descriptor error:&error];
             if (!m_residency)
                 {
-                fprintf(stderr,
-                        "HIP-on-Metal: failed to create a residency set: %s\n",
-                        error ? error.localizedDescription.UTF8String : "unknown error");
+                m_unavailable_reason = std::string("Failed to create a Metal residency set: ")
+                                       + (error ? error.localizedDescription.UTF8String
+                                                : "unknown error");
                 m_device = nil;
                 return;
                 }
@@ -937,7 +959,6 @@ class Runtime
             m_gpu_cores = query_gpu_core_count();
             if (m_gpu_cores <= 0)
                 m_gpu_cores = 8;
-            m_gpu_family = query_gpu_family(m_device);
 
             const char* sync = getenv("HOOMD_METAL_SYNC");
             m_sync_launches = sync && strcmp(sync, "0") != 0;
@@ -967,6 +988,7 @@ class Runtime
         }
 
     id<MTLDevice> m_device = nil;
+    std::string m_unavailable_reason;
     id<MTLCommandQueue> m_queue = nil;
     id<MTLFence> m_fence = nil;
     id<MTLResidencySet> m_residency = nil;
@@ -1110,7 +1132,10 @@ hipError_t hipGetDeviceCount(int* count)
     {
     if (!count)
         return hipErrorInvalidValue;
-    *count = Runtime::instance().available() ? 1 : 0;
+    Runtime& runtime = Runtime::instance();
+    *count = runtime.available() ? 1 : 0;
+    if (!runtime.available())
+        return runtime.set_error(hipErrorNoDevice, runtime.unavailable_reason());
     return hipSuccess;
     }
 

@@ -1,0 +1,21 @@
+# Conda environment for building and running HOOMD-metal on Apple silicon Macs.
+#
+# metal/install.sh creates this environment, then builds HOOMD-metal and installs it here.
+# Tested with python 3.12.15, numpy 2.5.4, pybind11 3.1.0, eigen 5.0.1, cereal 1.3.2,
+# cmake 4.4.4, ninja 1.13.2, gsd 5.0.1, pytest 9.1.1, rowan 1.3.2 (conda-forge, osx-arm64).
+name: hoomd-metal
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - numpy
+  - pybind11>=2.12
+  - eigen
+  - cereal
+  - cmake>=3.24
+  - ninja
+  - gsd>=3
+  # used by the validation scripts and HOOMD's test suite
+  - pytest
+  - rowan
