@@ -1,4 +1,4 @@
-# HOOMD-metal
+[![HOOMD-metal](sphinx-doc/hoomdmetal-logo-horizontal.svg)](https://github.com/aldorvasq/HOOMD-metal)
 
 **HOOMD-metal** is HOOMD-blue with a GPU backend for Apple silicon Macs (M1 or newer, macOS 15 or
 newer). HOOMD-blue scripts run unchanged on the Mac's GPU with `hoomd.device.GPU()`. This is an

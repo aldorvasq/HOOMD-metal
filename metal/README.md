@@ -1,4 +1,4 @@
-# HOOMD-metal
+![HOOMD-metal](../sphinx-doc/hoomdmetal-logo-horizontal.svg)
 
 HOOMD-metal is [HOOMD-blue](https://github.com/glotzerlab/hoomd-blue) with a GPU backend for
 Apple silicon Macs. Scripts written for HOOMD-blue run unchanged: `hoomd.device.GPU()` selects
@@ -123,3 +123,6 @@ HOOMD-blue's code remains under its BSD 3-Clause License ([LICENSE](../LICENSE))
 the Metal versions of HOOMD-blue's CUDA kernels (the `.metal` and `.metal.inc` files outside
 `hoomd/mtl`) and every change to an existing HOOMD-blue file. Each file's header states which
 license applies.
+
+The HOOMD-metal logos (`sphinx-doc/hoomdmetal-logo-*.svg`) are the HOOMD-blue logo in silver,
+with the letter t from the hoomd-rs logo, and remain under the BSD 3-Clause License.
