@@ -1,8 +1,7 @@
-![HOOMD-metal](../sphinx-doc/hoomdmetal-logo-horizontal.svg)
+# HOOMD-metal technical guide
 
-HOOMD-metal is [HOOMD-blue](https://github.com/glotzerlab/hoomd-blue) with a GPU backend for
-Apple silicon Macs. Scripts written for HOOMD-blue run unchanged: `hoomd.device.GPU()` selects
-the Mac's GPU. It is an unofficial fork and is not supported by the HOOMD-blue developers.
+This guide covers installation options, validation, benchmarking, runtime settings, and how the
+Metal backend works. For an overview, see the [main README](../README.md).
 
 ## Requirements
 
@@ -10,9 +9,9 @@ the Mac's GPU. It is an unofficial fork and is not supported by the HOOMD-blue d
 - macOS 15 (Sequoia) or newer.
 - Apple's command line tools: `xcode-select --install`.
 - An arm64 conda, such as [Miniforge](https://github.com/conda-forge/miniforge) or Anaconda for
-  Apple silicon. An Intel conda running under Rosetta does not work.
+  Apple silicon. An Intel conda running under Rosetta does not work, and the installer says so.
 
-Intel Macs cannot use the GPU backend. On an Intel Mac `hoomd.device.GPU()` raises an error that
+Intel Macs cannot use the GPU backend: on an Intel Mac `hoomd.device.GPU()` raises an error that
 says to use `hoomd.device.CPU()`.
 
 ## Install
@@ -24,34 +23,47 @@ metal/install.sh --validate
 conda activate hoomd-metal
 ```
 
-`metal/install.sh` creates the conda environment `hoomd-metal` from
-[`environment.yml`](environment.yml), builds HOOMD-metal, installs it into the environment, runs a
-short GPU test, and with `--validate` runs the CPU vs GPU checks. The build takes about 5 minutes
-on an M4 Mac mini. Options: `--name ENV` for another environment name, `--jobs N` to limit
-parallel compiles on machines with little memory, `--no-mpcd` to skip MPCD.
+[`install.sh`](install.sh) checks the Mac, creates (or updates) the conda environment from
+[`environment.yml`](environment.yml), fetches missing git submodules, builds HOOMD-metal,
+installs it into the environment, and runs a short GPU test. The build takes about 5 minutes on an
+M4 Mac mini.
+
+| Option | Effect |
+|---|---|
+| `--name ENV` | Install into the conda environment `ENV` instead of `hoomd-metal`. |
+| `--jobs N` | Compile with `N` parallel jobs (the default is chosen from memory and cores). |
+| `--build-dir DIR` | Build in `DIR` instead of `build/hoomd-metal`. |
+| `--no-mpcd` | Skip the MPCD component. |
+| `--validate` | Run the validation checks after installing. |
 
 To update, `git pull` and run `metal/install.sh` again. To uninstall, run
 `conda env remove -n hoomd-metal`.
 
+To configure a build by hand, pass `-DENABLE_GPU=ON -DHOOMD_GPU_PLATFORM=Metal` to CMake. Metal
+builds are always single precision, build without HPMC and MPI, and target macOS 15.
+
 ## Check this Mac
 
 ```bash
-python metal/validate/validate.py           # 10 checks, 2-3 minutes
-python metal/validate/validate.py --pytest  # also HOOMD's test suite (30 s more)
+python metal/validate/validate.py             # 10 checks, about 2 minutes
+python metal/validate/validate.py polymer     # selected checks
+python metal/validate/validate.py --pytest    # also HOOMD-blue's test suite (30 s more)
 ```
 
-Each check runs the same simulation with `hoomd.device.CPU()` and `hoomd.device.GPU()` and
-compares the results. Single-step forces, torques, energies, and virials must match to about
-1e-4 or better. Short trajectories that use the same random numbers must match closely. Long
-runs must agree within their statistical error, and NVE runs must conserve energy. The checks
-cover:
+Each check runs the same simulation with `hoomd.device.CPU()` and `hoomd.device.GPU()`, in
+separate processes, and compares the results:
+
+- Single-step forces, torques, energies, and virials must match to 1e-4 of their largest value
+  (a few forms with near-singular geometry allow up to 1e-2).
+- Short trajectories that use the same random numbers must match closely.
+- Long runs must agree within five standard errors, and NVE runs must conserve energy.
 
 | Check | Contents |
 |---|---|
 | `forces` | 25 pair potentials, DPD, bonds, angles, dihedrals, impropers, special pairs, external fields, walls |
 | `aniso` | Gay-Berne, dipole, YLZ, ALJ, patchy, friction, Tersoff, square density, RevCross |
 | `nlist` | Cell, Stencil, and Tree neighbor lists |
-| `pppm` | PPPM electrostatics |
+| `pppm` | PPPM electrostatics (orders 3, 5, 7) |
 | `polymer` | Kremer-Grest melt with NVE, Langevin, NPT, and Bussi dynamics |
 | `lj` | LJ liquid, NVE |
 | `rigid` | Rigid bodies |
@@ -59,14 +71,22 @@ cover:
 | `flow` | Reverse perturbation (Mueller-Plathe) flow |
 | `mpcd` | MPCD streaming, collisions, walls, fillers, flows, embedded chain |
 
-`--pytest` runs HOOMD's own test suite on both devices and reports tests that fail on the GPU but
+`--pytest` runs HOOMD-blue's test suite on both devices and reports tests that fail on the GPU but
 pass on the CPU. Many tests fail on both devices because they assume a double precision build;
-those do not count.
+those do not count. A short list of known single precision cases is reported separately, each
+with its explanation (see `PYTEST_KNOWN_GPU_ONLY` in [`validate.py`](validate/validate.py)).
 
-## Performance
+## Benchmark
 
-Measured with `metal/bench/benchmark.py` on an M4 Mac mini (10-core GPU, 120 GB/s memory
-bandwidth), against one core of the same Mac's CPU:
+```bash
+python metal/bench/benchmark.py                  # bead-spring melts, 6,400 to 409,600 beads
+python metal/bench/benchmark.py --system lj      # LJ liquid
+python metal/bench/benchmark.py --device cpu     # one CPU core, for comparison
+python metal/bench/benchmark.py --sustain 15     # 15 minutes, to see thermal throttling
+```
+
+Close other GPU-heavy applications (trajectory viewers, games, video) before measuring.
+Measurements on an M4 Mac mini (10-core GPU, 120 GB/s):
 
 | System | Particles | GPU steps/s | CPU steps/s | Speedup |
 |---|---|---|---|---|
@@ -76,26 +96,10 @@ bandwidth), against one core of the same Mac's CPU:
 | | 409,600 | 302 | 14 | 21x |
 | LJ liquid (r_cut = 2.5), Bussi NVT | 32,768 | 1,449 | 57 | 25x |
 
-Measure your own Mac with `python metal/bench/benchmark.py` (`--device cpu` for the CPU column,
-`--sustain 15` to see whether throughput drops during long runs).
-
-What to expect on other Macs:
-
-- **Large systems** are limited by memory bandwidth, so they speed up roughly with it: M Pro
-  chips have 150-273 GB/s, M Max 300-546 GB/s, and M Ultra 800-819 GB/s. An Ultra appears as one
-  GPU and HOOMD uses all of its cores.
-- **Small systems** (below about 10,000 particles) are limited by a fixed cost per step, so faster
-  GPUs help little. Run several independent simulations at once to use a large GPU fully.
-- **MacBook Air** models have no fan and slow down after a few minutes of full GPU load. Results
-  are unchanged. Keep the Mac on power, and start long runs with `caffeinate -i` so it does not
-  sleep.
-- **Memory:** a bead-spring melt uses about 1.2 KB per bead, so 8 GB holds about 3 million beads.
-
-## Limitations
-
-- Single precision only. Apple GPUs have no double precision arithmetic.
-- No HPMC. HOOMD-blue requires a double precision build for hard particle Monte Carlo.
-- No MPI. One HOOMD-metal process uses one GPU, which on Apple silicon is the whole GPU.
+Large systems are limited by memory bandwidth and scale with it across Macs. Small systems are
+limited by about one CPU-GPU synchronization per time step (the neighbor list check), which a
+bigger GPU does not shorten. MacBook Airs have no fan and slow down after a few minutes of full
+load; keep them on power and start long runs with `caffeinate -i` so the Mac does not sleep.
 
 ## Runtime settings
 
@@ -108,9 +112,21 @@ What to expect on other Macs:
 
 ## How it works
 
-`hoomd/mtl` implements the part of the HIP runtime that HOOMD uses on top of Metal. Each CUDA
-kernel file (`.cu`) has a `.metal` counterpart with the Metal Shading Language kernels and their
-C++ launchers. The kernels are compiled for the Mac's GPU when a simulation first uses them.
+HOOMD-blue's C++ engine talks to the GPU through the HIP runtime API. HOOMD-metal implements the
+part of that API HOOMD uses on top of Apple's Metal ([`hoomd/mtl`](../hoomd/mtl)), so the engine
+runs unchanged:
+
+- **Memory.** Apple silicon has unified memory, so every allocation is shared between CPU and GPU
+  and most host-device copies become free.
+- **Kernel launches** are encoded into Metal command buffers, ordered with fences, and committed
+  early so the GPU works while the CPU prepares the next step.
+- **Kernels.** Each CUDA kernel file (`.cu`) has a `.metal` counterpart with Metal Shading
+  Language kernels and their C++ launchers. CUDA templates become Metal function constants. The
+  kernels are embedded in the library and compiled for the Mac's GPU on first use.
+- **Libraries** that have no Metal version are reimplemented: sorting, scans, and reductions
+  (`Primitives.h`, replacing CUB and thrust), FFTs for PPPM (`HipFFT.metal`), a bounding volume
+  hierarchy for the tree neighbor list, and a Philox random number generator that reproduces
+  HOOMD-blue's random streams bit for bit.
 
 ## License
 
@@ -124,5 +140,6 @@ the Metal versions of HOOMD-blue's CUDA kernels (the `.metal` and `.metal.inc` f
 `hoomd/mtl`) and every change to an existing HOOMD-blue file. Each file's header states which
 license applies.
 
-The HOOMD-metal logos (`sphinx-doc/hoomdmetal-logo-*.svg`) are the HOOMD-blue logo in silver,
-with the letter t from the hoomd-rs logo, and remain under the BSD 3-Clause License.
+The HOOMD-metal logos and social preview image (`sphinx-doc/hoomdmetal-*`) are derived from the
+HOOMD-blue logo, with the letter t from the hoomd-rs logo, and remain under the BSD 3-Clause
+License.

@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: >-
+  If you use HOOMD-metal in published work, please cite HOOMD-blue (the reference below) and
+  HOOMD-metal.
+title: "HOOMD-metal: HOOMD-blue molecular dynamics on Apple silicon GPUs"
+type: software
+authors:
+  - family-names: Vasquez-Briceno
+    given-names: Aldo
+version: 0.1.0
+date-released: "2026-10-18"
+repository-code: "https://github.com/aldorvasq/HOOMD-metal"
+license:
+  - BSD-3-Clause
+  - MIT
+abstract: >-
+  HOOMD-metal adds a Metal GPU backend to HOOMD-blue so that HOOMD-blue molecular dynamics
+  simulations run on the GPU of Apple silicon Macs with unchanged Python scripts.
+keywords:
+  - molecular dynamics
+  - HOOMD-blue
+  - GPU
+  - Apple silicon
+  - Metal
+  - macOS
+  - soft matter
+references:
+  - type: article
+    title: >-
+      HOOMD-blue: A Python package for high-performance molecular dynamics and hard particle
+      Monte Carlo simulations
+    authors:
+      - family-names: Anderson
+        given-names: Joshua A.
+      - family-names: Glaser
+        given-names: Jens
+      - family-names: Glotzer
+        given-names: Sharon C.
+    journal: Computational Materials Science
+    volume: 173
+    start: 109363
+    year: 2020
+    doi: 10.1016/j.commatsci.2019.109363

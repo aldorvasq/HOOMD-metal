@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 350" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<!-- Copyright (c) 2026 Aldo Vasquez-Briceno. Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT). -->
+<text x="190" y="30" font-size="19" font-weight="600" fill="#6e7781">GPU speedup over one CPU core</text>
+<text x="190" y="52" font-size="13" fill="#8c959f">Apple M4 Mac mini, 10-core GPU. Bead-spring polymer melts and an LJ liquid.</text>
+<line x1="274.0" y1="64" x2="274.0" y2="292" stroke="#8c959f" stroke-opacity="0.3" stroke-width="1"/>
+<text x="274.0" y="312" font-size="12" fill="#8c959f" text-anchor="middle">5x</text>
+<line x1="358.0" y1="64" x2="358.0" y2="292" stroke="#8c959f" stroke-opacity="0.3" stroke-width="1"/>
+<text x="358.0" y="312" font-size="12" fill="#8c959f" text-anchor="middle">10x</text>
+<line x1="442.0" y1="64" x2="442.0" y2="292" stroke="#8c959f" stroke-opacity="0.3" stroke-width="1"/>
+<text x="442.0" y="312" font-size="12" fill="#8c959f" text-anchor="middle">15x</text>
+<line x1="526.0" y1="64" x2="526.0" y2="292" stroke="#8c959f" stroke-opacity="0.3" stroke-width="1"/>
+<text x="526.0" y="312" font-size="12" fill="#8c959f" text-anchor="middle">20x</text>
+<line x1="610.0" y1="64" x2="610.0" y2="292" stroke="#8c959f" stroke-opacity="0.3" stroke-width="1"/>
+<text x="610.0" y="312" font-size="12" fill="#8c959f" text-anchor="middle">25x</text>
+<text x="178" y="91" font-size="14" fill="#6e7781" text-anchor="end">6,400 beads</text>
+<rect x="190" y="74" width="88.7" height="26" rx="5" fill="#67727f"/>
+<text x="286.7" y="92" font-size="14" font-weight="600" fill="#6e7781">5.3x</text>
+<text x="330.7" y="92" font-size="12" fill="#8c959f">5,064 vs 959 steps/s</text>
+<text x="178" y="137" font-size="14" fill="#6e7781" text-anchor="end">25,600 beads</text>
+<rect x="190" y="120" width="171.8" height="26" rx="5" fill="#67727f"/>
+<text x="369.8" y="138" font-size="14" font-weight="600" fill="#6e7781">10.2x</text>
+<text x="413.8" y="138" font-size="12" fill="#8c959f">2,505 vs 245 steps/s</text>
+<text x="178" y="183" font-size="14" fill="#6e7781" text-anchor="end">102,400 beads</text>
+<rect x="190" y="166" width="274.1" height="26" rx="5" fill="#67727f"/>
+<text x="472.1" y="184" font-size="14" font-weight="600" fill="#6e7781">16.3x</text>
+<text x="516.1" y="184" font-size="12" fill="#8c959f">984 vs 60 steps/s</text>
+<text x="178" y="229" font-size="14" fill="#6e7781" text-anchor="end">409,600 beads</text>
+<rect x="190" y="212" width="357.3" height="26" rx="5" fill="#67727f"/>
+<text x="555.3" y="230" font-size="14" font-weight="600" fill="#6e7781">21.3x</text>
+<text x="599.3" y="230" font-size="12" fill="#8c959f">302 vs 14 steps/s</text>
+<text x="178" y="275" font-size="14" fill="#6e7781" text-anchor="end">LJ liquid, 32,768</text>
+<rect x="190" y="258" width="425.6" height="26" rx="5" fill="#959fab"/>
+<text x="623.6" y="276" font-size="14" font-weight="600" fill="#6e7781">25.3x</text>
+<text x="667.6" y="276" font-size="12" fill="#8c959f">1,449 vs 57 steps/s</text>
+</svg>
