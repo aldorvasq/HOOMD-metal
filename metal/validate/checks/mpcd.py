@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Multiparticle collision dynamics: streaming, collisions, walls, fillers, sorting, and a
 bead-spring chain embedded in an SRD solvent.
 

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Reverse perturbation (Mueller-Plathe) shear flow in an LJ liquid.
 
 Compares the exchanged momentum and the resulting velocity profile of 8000 particles over 700

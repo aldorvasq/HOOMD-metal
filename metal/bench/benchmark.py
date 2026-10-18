@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Measure HOOMD-metal throughput (time steps per second) on this Mac.
 
 Usage::

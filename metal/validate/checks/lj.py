@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Binary Lennard-Jones liquid (r_cut = 2.5) with NVE dynamics.
 
 Runs 4096 particles for 5050 steps. The first 50 steps must match closely, the later samples

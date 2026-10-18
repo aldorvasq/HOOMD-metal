@@ -12,6 +12,13 @@ conda activate hoomd-metal
 ```
 
 Requirements, validation, performance, and limitations: [metal/README.md](metal/README.md).
+
+**License:** the new HOOMD-metal code (the Metal runtime in `hoomd/mtl`, the tools in `metal/`,
+and `CMake/hoomd/HOOMDMetalSetup.cmake`) is released under the MIT License
+([LICENSE-MIT](LICENSE-MIT)). Everything else, including the Metal versions of HOOMD-blue's GPU
+kernels and the changes to HOOMD-blue's files, remains under HOOMD-blue's BSD 3-Clause License
+([LICENSE](LICENSE)). Each file's header states which license applies.
+
 The upstream HOOMD-blue README follows.
 
 ---

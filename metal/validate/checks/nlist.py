@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Cell, Stencil, and Tree neighbor lists with very different cutoffs (colloid + solvent).
 
 Compares LJ forces from each neighbor list type at step 0 and after 200 steps, and checks that

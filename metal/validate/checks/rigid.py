@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Rigid bodies (three-bead rods) mixed with free beads, integrated with NVE.
 
 Compares the step-0 forces, torques, and pressure tensor, the energies over 200 steps, and the

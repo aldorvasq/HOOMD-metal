@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """RATTLE integrators (NVE, Langevin, Brownian, active Brownian) on seven manifolds.
 
 Compares positions, velocities, and orientations after 100 steps, and checks that the particles

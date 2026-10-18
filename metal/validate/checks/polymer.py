@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Kremer-Grest bead-spring melt (WCA + FENE + harmonic angles) with four integration methods.
 
 Runs 5760 beads (288 chains of 20) for 21000 steps with NVE, Langevin, NPT (MTTK), and Bussi

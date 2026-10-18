@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Anisotropic, patchy, friction, and many-body potentials.
 
 Evaluates each potential on 2000 randomly oriented particles and compares per-particle forces,

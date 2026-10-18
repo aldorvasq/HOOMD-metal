@@ -1,5 +1,5 @@
-# Copyright (c) 2009-2026 The Regents of the University of Michigan.
-# Part of HOOMD-blue, released under the BSD 3-Clause License.
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 
 """Generate stubs for GPU driver functions that have no Metal implementation yet.
 

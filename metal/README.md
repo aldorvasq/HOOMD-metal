@@ -111,3 +111,15 @@ What to expect on other Macs:
 `hoomd/mtl` implements the part of the HIP runtime that HOOMD uses on top of Metal. Each CUDA
 kernel file (`.cu`) has a `.metal` counterpart with the Metal Shading Language kernels and their
 C++ launchers. The kernels are compiled for the Mac's GPU when a simulation first uses them.
+
+## License
+
+New HOOMD-metal code is released under the MIT License ([LICENSE-MIT](../LICENSE-MIT)): the
+Metal runtime and tools in `hoomd/mtl` (except `WarpTools.h`), everything in `metal/`, and
+`CMake/hoomd/HOOMDMetalSetup.cmake`. `hoomd/mtl/Philox.h` follows OpenRAND's Philox generator
+(MIT License, Copyright (c) 2023, Michigan State University).
+
+HOOMD-blue's code remains under its BSD 3-Clause License ([LICENSE](../LICENSE)). That includes
+the Metal versions of HOOMD-blue's CUDA kernels (the `.metal` and `.metal.inc` files outside
+`hoomd/mtl`) and every change to an existing HOOMD-blue file. Each file's header states which
+license applies.

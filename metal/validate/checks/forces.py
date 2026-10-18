@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """Pair, bond, angle, dihedral, improper, special pair, external, and wall forces.
 
 Evaluates every force on one configuration of 300 ten-bead chains in a triclinic box and compares

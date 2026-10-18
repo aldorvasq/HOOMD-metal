@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 """PPPM long-range electrostatics (assignment orders 3, 5, and 7) in a triclinic box.
 
 Compares the reciprocal-space and real-space forces, the pressure tensor, and the energy of 4000

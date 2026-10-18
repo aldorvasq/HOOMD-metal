@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 # Metal GPU platform support.
 #
 # HOOMD's GPU kernels for Apple GPUs are written in the Metal Shading Language in .metal files. Each

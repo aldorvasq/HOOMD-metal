@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 # Build HOOMD-metal and install it into a conda environment (created when needed).
 #
 # Usage: metal/install.sh [options]
@@ -38,7 +41,7 @@ while [[ $# -gt 0 ]]; do
         -b | --build-dir) BUILD_DIR="$(mkdir -p "$2" && cd "$2" && pwd)"; shift 2 ;;
         --no-mpcd) BUILD_MPCD="OFF"; shift ;;
         --validate) VALIDATE=1; shift ;;
-        -h | --help) sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h | --help) sed -n '5,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) die "unknown option '$1' (see --help)" ;;
     esac
 done

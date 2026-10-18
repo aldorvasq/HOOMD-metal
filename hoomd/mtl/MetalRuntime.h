@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2026 The Regents of the University of Michigan.
-// Part of HOOMD-blue, released under the BSD 3-Clause License.
+// Copyright (c) 2026 Aldo Vasquez-Briceno.
+// Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
 
 /*! \file MetalRuntime.h
     \brief Host-side API to launch Metal compute kernels from HOOMD-blue's GPU driver functions.

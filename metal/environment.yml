@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Aldo Vasquez-Briceno.
+# Part of HOOMD-metal, released under the MIT License (see LICENSE-MIT).
+
 # Conda environment for building and running HOOMD-metal on Apple silicon Macs.
 #
 # metal/install.sh creates this environment, then builds HOOMD-metal and installs it here.
