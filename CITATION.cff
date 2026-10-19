@@ -9,7 +9,7 @@ authors:
     given-names: Aldo
     affiliation: The University of Texas at San Antonio
     orcid: "https://orcid.org/0009-0009-8190-9411"
-version: 0.1.2
+version: 0.1.3
 date-released: "2026-10-18"
 doi: 10.5281/zenodo.23457466
 repository-code: "https://github.com/aldorvasq/HOOMD-metal"
